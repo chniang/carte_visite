@@ -1,0 +1,101 @@
+<!DOCTYPE html>  
+<html lang="fr">  
+<head>  
+  <meta charset="UTF-8">  
+  <title>Carte de visite - Cheikh</title>  
+  <link rel="icon" type="image/png" href="images/logo.png"> <!-- Ajout du favicon -->  
+  <style>  
+    body {  
+      font-family: sans-serif;  
+      text-align: center;  
+      background: #f4f4f4;  
+      padding: 20px;  
+    }  
+    .card {  
+      background: white;  
+      padding: 20px;  
+      border-radius: 10px;  
+      box-shadow: 0 0 10px gray;  
+      display: inline-block;  
+      max-width: 400px;  
+      margin: auto;  
+    }  
+    .card img.photo {  
+      width: 120px;  
+      height: 120px;  
+      border-radius: 50%;  
+      object-fit: cover;  
+      margin-bottom: 15px;  
+    }  
+    .card h1 {  
+      margin-bottom: 10px;  
+    }  
+    .card p {  
+      margin: 5px;  
+    }  
+    .btn {  
+      background: #27ae60;  
+      color: white;  
+      padding: 10px 20px;  
+      text-decoration: none;  
+      border-radius: 5px;  
+      display: inline-block;  
+      margin-top: 10px;  
+    }  
+    .social-links a {  
+      display: inline-block;  
+      margin: 10px;  
+    }  
+    .social-links img {  
+      height: 40px;  
+      width: 40px;  
+      border-radius: 5px;  
+      transition: transform 0.2s;  
+    }  
+    .social-links img:hover {  
+      transform: scale(1.1);  
+    }  
+
+    /* Responsive Design */
+    @media (max-width: 600px) {
+      .card {
+        width: 90%;
+        font-size: 16px;
+      }
+      .social-links img {
+        width: 30px;
+        height: 30px;
+      }
+    }
+  </style>  
+</head>  
+<body>  
+  <div class="card">  
+    <!-- Ta photo -->  
+    <img src="images/ma_photo.jpg" alt="Photo de Cheikh Niang" class="photo">  
+  
+    <h1>Cheikh Niang</h1>  
+    <p>Data Scientist & Dév Web/Python</p>  
+    <p>Tél: <a href="https://wa.me/221776362714">+221 776362714</a></p>  
+    <p>Email: <a href="mailto:cheikh@example.com">cheikh@example.com</a></p>  
+    <p>Adresse: Médina rue 6x31, Dakar, Sénégal</p>  
+  
+    <div class="social-links">  
+      <a href="https://www.facebook.com/shewou.at.tijaani/" target="_blank">  
+        <img src="images/facebook_image.jpg" alt="Facebook">  
+      </a>  
+      <a href="https://www.tiktok.com/@tonprofil" target="_blank">  
+        <img src="images/tik_tok_image.jpg" alt="TikTok">  
+      </a>  
+      <a href="https://wa.me/221776362714" target="_blank">  
+        <img src="images/whatsapp_image.png" alt="WhatsApp">  
+      </a>  
+      <a href="https://www.instagram.com/tijaani7/" target="_blank">  
+        <img src="images/instagram_image.png" alt="Instagram">  
+      </a>  
+    </div>  
+  
+    <p><a href="https://portfolio.cheikh.com" class="btn">Voir mon portfolio</a></p>  
+  </div>  
+</body>  
+</html>
