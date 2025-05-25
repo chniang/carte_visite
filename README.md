@@ -52,7 +52,7 @@ projet_carte_de_visite_pro/
 ## 🧑‍💻 Auteur
 
 **Cheikh Niang**  
-Développeur Data Scientist & Dev Web/Python  
+Data Scientist & Dev Web/Python  
 📞 [WhatsApp](https://wa.me/221776362714)  
 📧 cheikhniang159@gmail.com
 
