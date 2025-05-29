@@ -2,6 +2,7 @@
 <html lang="fr">  
 <head>  
   <meta charset="UTF-8">  
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cheikh Niang</title>  
   <link rel="icon" type="image/png" href="images/ma_photo.jpg">  
   <style>  
@@ -17,9 +18,11 @@
       padding: 25px;
       border-radius: 15px;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-      display: inline-block;
+      display: block;
+      margin: 10px auto;
       max-width: 420px;
-      margin: auto;
+      width: 100%;
+      box-sizing: border-box;
     }
     .card img.photo {
       width: 140px;
@@ -112,10 +115,17 @@
       cursor: pointer;
     }
 
+    /* MOBILE RESPONSIVE */
     @media (max-width: 600px) {
+      body {
+        padding: 0;
+      }
       .card {
-        width: 100%;
-        font-size: 20px;
+        max-width: 100%;
+        padding: 20px;
+        border-radius: 0;
+        box-shadow: none;
+        margin: 0;
       }
       .card img.photo {
         width: 170px;
@@ -236,4 +246,3 @@
 
 </body>  
 </html>
-
