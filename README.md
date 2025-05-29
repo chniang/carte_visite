@@ -1,60 +1,69 @@
 # 💼 Carte de Visite Numérique - Cheikh Niang
 
-Bienvenue dans mon projet de **carte de visite professionnelle en ligne**, simple, responsive et accessible depuis n’importe quel navigateur.
+Bienvenue dans mon projet de **carte de visite digitale interactive**, simple, responsive et accessible depuis n’importe quel navigateur.
 
 ## 📌 Présentation
 
 Cette carte de visite numérique permet de présenter de manière élégante et synthétique :
 
-- Mon **nom** et **profession**
+- Mon **nom** et **profession** (Data Scientist & Dev Web/Python)
 - Mes **coordonnées** (email, téléphone, adresse)
-- Un lien vers mon **portfolio**
-- Mes **réseaux sociaux** (Facebook, Instagram, WhatsApp, TikTok)
-- Une **photo de profil**
+- Une **photo de profil** cliquable pour agrandir l’image
+- Une liste déroulante des **services proposés** avec description dynamique et changement d’image
+- Mes **réseaux sociaux** (Facebook, TikTok, WhatsApp)
 
 ## 📸 Aperçu
 
-![Capture](./images/ma_photo.jpg)
+![Photo de profil](./images/ma_photo.jpg)
 
 ## 🛠️ Technologies utilisées
 
-- HTML5
-- CSS3
-- Hébergement via **GitHub Pages**
+- HTML5  
+- CSS3 (design responsive et animations simples)  
+- JavaScript (interactions dynamiques)
 
 ## 🚀 Fonctionnalités
 
-- Liens cliquables pour WhatsApp, e-mail, portfolio, réseaux sociaux
-- Responsive design (centré, clair et professionnel)
-- Photo de profil centrée
-- Icônes sociales interactives avec effet hover
+- Photo de profil avec zoom modal au clic  
+- Sélecteur de spécialités/services affichant la description et changeant l’image principale  
+- Liens cliquables vers WhatsApp, email, Facebook, TikTok  
+- Design responsive, adapté aux mobiles et ordinateurs  
+- Effets visuels modernes et intuitifs  
 
 ## 📂 Arborescence
 
-projet_carte_de_visite_pro/
+projet_carte_de_visite/
 │
 ├── images/
 │ ├── ma_photo.jpg
 │ ├── facebook_image.jpg
-│ ├── instagram_image.png
 │ ├── tik_tok_image.jpg
-│ └── whatsapp_image.png
+│ ├── whatsapp_image.png
+│ ├── site_web.png
+│ ├── portfolio.webp
+│ ├── automatisation.jpg
+│ ├── data_viz.png
+│ ├── web_scraping.jpg
+│ ├── dashboard.jpg
+│ ├── carte_visite.png
+│ └── script_python.jpg
 │
 └── index.html
 
-
+less
+Copier
+Modifier
 
 ## 🔗 Lien de la carte
 
-👉 [Voir la carte en ligne](https://ton-utilisateur.github.io/projet_carte_de_visite_pro)
-
+👉 [Voir la carte en ligne](https://ton-utilisateur.github.io/projet_carte_de_visite)
 
 ## 🧑‍💻 Auteur
 
 **Cheikh Niang**  
 Data Scientist & Dev Web/Python  
 📞 [WhatsApp](https://wa.me/221776362714)  
-📧 cheikhniang159@gmail.com
+📧 cheikhniang159@gmail.com  
 
 ---
 
