@@ -1,34 +1,27 @@
-<!DOCTYPE html>   
-<html lang="fr">  
-<head>  
-  <meta charset="UTF-8" />  
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cheikh Niang</title>  
-  <link rel="icon" type="image/png" href="images/ma_photo.jpg" />  
-  <style>  
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
-
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Carte de visite - Cheikh Niang</title>
+  <link rel="icon" type="image/png" href="images/ma_photo.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      text-align: center;
       background: linear-gradient(to right, #f9f9f9, #dbeafe);
-      padding: 20px;
       margin: 0;
+      padding: 20px;
       color: #1e293b;
-      overflow-x: hidden;
+      text-align: center;
     }
 
     .card {
       background: white;
-      padding: 25px 20px;
+      max-width: 420px;
+      margin: auto;
+      padding: 25px;
       border-radius: 15px;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-      margin: 10px auto;
-      max-width: 420px;
-      width: 100%;
-      text-align: center;
     }
 
     .card img.photo {
@@ -39,51 +32,31 @@
       margin-bottom: 20px;
       border: 3px solid #3b82f6;
       cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .card img.photo:hover {
+      transform: scale(1.05);
     }
 
     .card h1 {
       margin-bottom: 10px;
       font-size: 26px;
-      word-wrap: break-word;
     }
 
     .card p {
       margin: 8px 0;
       font-size: 18px;
-      word-wrap: break-word;
-    }
-
-    select {
-      font-size: 16px;
-      padding: 8px;
-      border-radius: 6px;
-      margin-top: 5px;
-      width: 100%;
-      max-width: 100%;
-      box-sizing: border-box;
-      cursor: pointer;
-      text-align: center;         /* Centre le texte de l'option */
-      text-align-last: center;    /* Centre le texte sélectionné */
-    }
-
-    #description-specialite {
-      margin-top: 12px;
-      font-style: italic;
-      font-size: 17px;
-      color: #374151;
-      min-height: 50px;
-      word-wrap: break-word;
-      padding: 0 5px;
     }
 
     .btn {
       background: #3b82f6;
-      color: white;
+      color: #fff;
       padding: 12px 22px;
-      text-decoration: none;
       border-radius: 8px;
+      text-decoration: none;
       display: inline-block;
-      margin-top: 12px;
+      margin-top: 15px;
       transition: background 0.3s ease;
     }
 
@@ -91,216 +64,161 @@
       background: #2563eb;
     }
 
-    .btn.secondary {
-      background: #10b981;
-    }
-
-    .btn.secondary:hover {
-      background: #059669;
-    }
-
     .social-links {
-      margin-top: 20px;
+      margin-top: 15px;
     }
 
     .social-links a {
+      margin: 0 8px;
       display: inline-block;
-      margin: 10px;
     }
 
     .social-links img {
       height: 44px;
       width: 44px;
       border-radius: 5px;
-      transition: transform 0.2s ease;
+      transition: transform 0.3s ease;
     }
 
     .social-links img:hover {
       transform: scale(1.1);
     }
 
+    select {
+      font-size: 16px;
+      padding: 6px;
+      border-radius: 6px;
+      margin-top: 5px;
+    }
+
+    #description-specialite {
+      margin-top: 12px;
+      font-style: italic;
+      font-size: 17px;
+      color: #374151;
+    }
+
+    /* Modale */
     .modal {
       display: none;
       position: fixed;
-      z-index: 99;
-      padding-top: 60px;
-      left: 0;
-      top: 0;
+      z-index: 999;
+      top: 0; left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
-      overflow: auto;
+      background: rgba(0, 0, 0, 0.8);
     }
 
     .modal-content {
-      margin: auto;
+      margin: 5% auto;
       display: block;
       max-width: 90%;
-      max-height: 80vh;
-      border-radius: 10px;
-      width: auto;
-      height: auto;
-      object-fit: contain;
+      max-height: 90vh;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
     }
 
-    .modal-close {
+    .close {
       position: absolute;
       top: 20px;
       right: 30px;
       color: #fff;
-      font-size: 30px;
+      font-size: 40px;
       font-weight: bold;
       cursor: pointer;
-      user-select: none;
     }
 
     @media (max-width: 600px) {
-      body {
-        padding: 10px 10px 20px 10px;
-      }
-
-      .card {
-        max-width: 100%;
-        padding: 20px 15px;
-        border-radius: 10px;
-        margin: 0 auto;
-        box-shadow: none;
-      }
-
       .card img.photo {
-        width: 140px;
-        height: 140px;
-      }
-
-      .card h1 {
-        font-size: 24px;
-      }
-
-      .card p, select, #description-specialite {
-        font-size: 16px;
-      }
-
-      select {
-        max-width: 100%;
-        width: 100%;
-      }
-
-      #description-specialite {
-        padding: 0 10px;
+        width: 160px;
+        height: 160px;
       }
 
       .social-links img {
-        width: 40px;
-        height: 40px;
-      }
-
-      .modal-content {
-        max-width: 100%;
-        max-height: 100vh;
-        border-radius: 0;
-        width: 100%;
-        height: auto;
+        width: 36px;
+        height: 36px;
       }
     }
-  </style>  
-</head>  
-<body>  
+  </style>
+</head>
+<body>
 
-  <div class="card">  
-    <img id="photo-profil" src="images/ma_photo.jpg" alt="Photo de cheikh niang" class="photo" onclick="agrandirImage(this.src)" />  
-    <h1>Cheikh Niang</h1>  
-    <p>Data Scientist & Dev Web/Python</p>  
+  <div class="card">
+    <img id="photo-profil" src="images/ma_photo.jpg" alt="Portrait de Cheikh Niang" class="photo" onclick="ouvrirImage(this.src)">
+    <h1>Cheikh Niang</h1>
+    <p>Développeur Python & Web</p>
 
-    <label for="specialite">Services :</label><br />  
-    <select id="specialite" onchange="afficherDescription()">  
-      <option value="">-- Sélectionner --</option>  
-      <option value="site_web">Création de site web</option>  
-      <option value="portfolio">Portfolio professionnel</option>  
-      <option value="automatisation">Automatisation de tâches (Python)</option>  
-      <option value="data_viz">Analyse & visualisation de données</option>  
-      <option value="web_scraping">Extraction de données web (scraping)</option>  
-      <option value="dashboard">Création de dashboard interactif</option>  
-      <option value="carte_visite">Carte de visite numérique</option>  
-      <option value="script_python">Développement de scripts personnalisés</option>  
-    </select>  
+    <label for="specialite">Spécialité :</label><br>
+    <select id="specialite" onchange="afficherDescription()">
+      <option value="">-- Choisir --</option>
+      <option value="python">Applications Python</option>
+      <option value="django">Sites avec Django</option>
+      <option value="web">Sites vitrines modernes</option>
+      <option value="automatisation">Automatisation de tâches</option>
+      <option value="data">Analyse de données</option>
+    </select>
 
-    <p id="description-specialite"></p>  
+    <p id="description-specialite"></p>
 
-    <p>Tél: <a href="https://wa.me/221776362714" target="_blank" rel="noopener">+221 776362714</a></p>  
-    <p>Email: <a href="mailto:cheikhniang159@gmail.com">cheikhniang159@gmail.com</a></p>  
-    <p>Adresse: Geule Tape, Dakar</p>  
+    <p>Tél: <a href="https://wa.me/221771234567">+221 77 123 45 67</a></p>
+    <p>Email: <a href="mailto:cheikhdev@gmail.com">cheikhdev@gmail.com</a></p>
+    <p>Adresse: Kaolack, Sénégal</p>
 
-    <div class="social-links">  
-      <a href="https://www.facebook.com/shewou.at.tijaani/" target="_blank" rel="noopener">  
-        <img src="images/facebook_image.jpg" alt="Facebook" />  
-      </a>  
-      <a href="https://www.tiktok.com/@tonprofil" target="_blank" rel="noopener">  
-        <img src="images/tik_tok_image.jpg" alt="TikTok" />  
-      </a>  
-      <a href="https://wa.me/221776362714" target="_blank" rel="noopener">  
-        <img src="images/whatsapp_image.png" alt="WhatsApp" />  
-      </a>  
-    </div>  
-  </div>  
+    <div class="social-links">
+      <a href="https://www.facebook.com/cheikhniang" target="_blank">
+        <img src="images/facebook_image.jpg" alt="Facebook">
+      </a>
+      <a href="https://www.tiktok.com/@cheikhdev" target="_blank">
+        <img src="images/tik_tok_image.jpg" alt="TikTok">
+      </a>
+      <a href="https://wa.me/221771234567" target="_blank">
+        <img src="images/whatsapp_image.png" alt="WhatsApp">
+      </a>
+    </div>
 
-  <div id="modalImage" class="modal" onclick="fermerImage()">  
-    <span class="modal-close" onclick="fermerImage()">&times;</span>  
-    <img class="modal-content" id="imageZoom" alt="Image agrandie" />  
-  </div>  
+    <a href="https://chniang.github.io/CARTE_DE_VISITE_PRO/" class="btn">Créer ma carte</a>
+  </div>
+
+  <!-- Modale image -->
+  <div id="imageModal" class="modal" onclick="fermerImage()">
+    <span class="close" onclick="fermerImage()">&times;</span>
+    <img class="modal-content" id="modal-img" alt="Aperçu">
+  </div>
 
   <script>
     function afficherDescription() {
       const descriptions = {
-        site_web: "Conception de sites web modernes et responsives pour particuliers ou entreprises.",
-        portfolio: "Création de portfolios pour valoriser vos compétences ou projets.",
-        automatisation: "Développement de scripts Python pour automatiser vos tâches répétitives.",
-        data_viz: "Analyse de données avec graphiques clairs et rapports visuels interactifs.",
-        web_scraping: "Récupération automatisée de données à partir de sites web.",
-        dashboard: "Tableaux de bord dynamiques pour le suivi de vos données (avec Streamlit ou Dash).",
-        carte_visite: "Création de cartes de visite numériques personnalisées et interactives.",
-        script_python: "Développement de solutions Python adaptées à vos besoins spécifiques."
+        python: "Développement d'applications robustes avec Python.",
+        django: "Création de sites dynamiques avec le framework Django.",
+        web: "Sites web modernes, responsive et attrayants.",
+        automatisation: "Scripts pour automatiser vos tâches quotidiennes.",
+        data: "Collecte, nettoyage et analyse de données avec Python."
       };
 
       const images = {
-        site_web: "images/site_web.png",
-        portfolio: "images/portfolio.webp",
-        automatisation: "images/Automatisation.jpg",
-        data_viz: "images/data_viz.png",
-        web_scraping: "images/web_scraping.jpg",
-        dashboard: "images/dashboard.jpg",
-        carte_visite: "images/carte_visite.png",
-        script_python: "images/script_python.jpg"
+        python: "images/python_project.jpg",
+        django: "images/django_site.jpg",
+        web: "images/web_design.jpg",
+        automatisation: "images/automation.jpg",
+        data: "images/data_analysis.jpg"
       };
 
       const choix = document.getElementById("specialite").value;
-      const descElement = document.getElementById("description-specialite");
-      const imageElement = document.getElementById("photo-profil");
-
-      descElement.textContent = descriptions[choix] || "";
-      imageElement.src = images[choix] || "images/ma_photo.jpg";
+      document.getElementById("description-specialite").textContent = descriptions[choix] || "";
+      document.getElementById("photo-profil").src = images[choix] || "images/ma_photo.jpg";
     }
 
-    function agrandirImage(src) {
-      const modal = document.getElementById("modalImage");
-      const imageZoom = document.getElementById("imageZoom");
-      imageZoom.src = src;
+    function ouvrirImage(src) {
+      const modal = document.getElementById("imageModal");
+      const modalImg = document.getElementById("modal-img");
       modal.style.display = "block";
-      history.pushState({ modalOpen: true }, "", "#modal");
+      modalImg.src = src;
     }
 
-    function fermerImage(event) {
-      if(event) event.stopPropagation();
-      const modal = document.getElementById("modalImage");
-      modal.style.display = "none";
-      if (location.hash === "#modal") history.back();
+    function fermerImage() {
+      document.getElementById("imageModal").style.display = "none";
     }
-
-    window.addEventListener("popstate", function(event) {
-      const modal = document.getElementById("modalImage");
-      if (modal.style.display === "block") {
-        modal.style.display = "none";
-      }
-    });
   </script>
-</body>  
+
+</body>
 </html>
