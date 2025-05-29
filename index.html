@@ -1,29 +1,36 @@
 <!DOCTYPE html>   
 <html lang="fr">  
 <head>  
-  <meta charset="UTF-8">  
+  <meta charset="UTF-8" />  
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cheikh Niang</title>  
-  <link rel="icon" type="image/png" href="images/ma_photo.jpg">  
+  <link rel="icon" type="image/png" href="images/ma_photo.jpg" />  
   <style>  
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Segoe UI', sans-serif;
       text-align: center;
       background: linear-gradient(to right, #f9f9f9, #dbeafe);
       padding: 20px;
+      margin: 0;
       color: #1e293b;
+      overflow-x: hidden;
     }
+
     .card {
       background: white;
-      padding: 25px;
+      padding: 25px 20px;
       border-radius: 15px;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-      display: block;
       margin: 10px auto;
       max-width: 420px;
       width: 100%;
-      box-sizing: border-box;
+      text-align: center;
     }
+
     .card img.photo {
       width: 140px;
       height: 140px;
@@ -33,14 +40,42 @@
       border: 3px solid #3b82f6;
       cursor: pointer;
     }
+
     .card h1 {
       margin-bottom: 10px;
       font-size: 26px;
+      word-wrap: break-word;
     }
+
     .card p {
       margin: 8px 0;
       font-size: 18px;
+      word-wrap: break-word;
     }
+
+    select {
+      font-size: 16px;
+      padding: 8px;
+      border-radius: 6px;
+      margin-top: 5px;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      cursor: pointer;
+      text-align: center;         /* Centre le texte de l'option */
+      text-align-last: center;    /* Centre le texte sélectionné */
+    }
+
+    #description-specialite {
+      margin-top: 12px;
+      font-style: italic;
+      font-size: 17px;
+      color: #374151;
+      min-height: 50px;
+      word-wrap: break-word;
+      padding: 0 5px;
+    }
+
     .btn {
       background: #3b82f6;
       color: white;
@@ -51,42 +86,39 @@
       margin-top: 12px;
       transition: background 0.3s ease;
     }
+
     .btn:hover {
       background: #2563eb;
     }
+
     .btn.secondary {
       background: #10b981;
     }
+
     .btn.secondary:hover {
       background: #059669;
     }
+
+    .social-links {
+      margin-top: 20px;
+    }
+
     .social-links a {
       display: inline-block;
       margin: 10px;
     }
+
     .social-links img {
       height: 44px;
       width: 44px;
       border-radius: 5px;
       transition: transform 0.2s ease;
     }
+
     .social-links img:hover {
       transform: scale(1.1);
     }
-    select {
-      font-size: 16px;
-      padding: 6px;
-      border-radius: 6px;
-      margin-top: 5px;
-    }
-    #description-specialite {
-      margin-top: 12px;
-      font-style: italic;
-      font-size: 17px;
-      color: #374151;
-    }
 
-    /* MODAL IMAGE */
     .modal {
       display: none;
       position: fixed;
@@ -97,14 +129,20 @@
       width: 100%;
       height: 100%;
       background-color: rgba(0, 0, 0, 0.8);
+      overflow: auto;
     }
+
     .modal-content {
       margin: auto;
       display: block;
       max-width: 90%;
       max-height: 80vh;
       border-radius: 10px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
     }
+
     .modal-close {
       position: absolute;
       top: 20px;
@@ -113,40 +151,55 @@
       font-size: 30px;
       font-weight: bold;
       cursor: pointer;
+      user-select: none;
     }
 
-    /* MOBILE RESPONSIVE */
     @media (max-width: 600px) {
       body {
-        padding: 0;
+        padding: 10px 10px 20px 10px;
       }
+
       .card {
         max-width: 100%;
-        padding: 20px;
-        border-radius: 0;
+        padding: 20px 15px;
+        border-radius: 10px;
+        margin: 0 auto;
         box-shadow: none;
-        margin: 0;
       }
+
       .card img.photo {
-        width: 170px;
-        height: 170px;
+        width: 140px;
+        height: 140px;
       }
+
       .card h1 {
-        font-size: 28px;
+        font-size: 24px;
       }
+
       .card p, select, #description-specialite {
-        font-size: 19px;
+        font-size: 16px;
       }
+
+      select {
+        max-width: 100%;
+        width: 100%;
+      }
+
+      #description-specialite {
+        padding: 0 10px;
+      }
+
       .social-links img {
         width: 40px;
         height: 40px;
       }
 
-      /* Modal image full screen on mobile */
       .modal-content {
         max-width: 100%;
         max-height: 100vh;
         border-radius: 0;
+        width: 100%;
+        height: auto;
       }
     }
   </style>  
@@ -154,11 +207,11 @@
 <body>  
 
   <div class="card">  
-    <img id="photo-profil" src="images/ma_photo.jpg" alt="Photo de cheikh niang" class="photo" onclick="agrandirImage(this.src)">  
+    <img id="photo-profil" src="images/ma_photo.jpg" alt="Photo de cheikh niang" class="photo" onclick="agrandirImage(this.src)" />  
     <h1>Cheikh Niang</h1>  
     <p>Data Scientist & Dev Web/Python</p>  
 
-    <label for="specialite">Services :</label><br>  
+    <label for="specialite">Services :</label><br />  
     <select id="specialite" onchange="afficherDescription()">  
       <option value="">-- Sélectionner --</option>  
       <option value="site_web">Création de site web</option>  
@@ -173,27 +226,26 @@
 
     <p id="description-specialite"></p>  
 
-    <p>Tél: <a href="https://wa.me/221776362714">+221 776362714</a></p>  
+    <p>Tél: <a href="https://wa.me/221776362714" target="_blank" rel="noopener">+221 776362714</a></p>  
     <p>Email: <a href="mailto:cheikhniang159@gmail.com">cheikhniang159@gmail.com</a></p>  
     <p>Adresse: Geule Tape, Dakar</p>  
 
     <div class="social-links">  
-      <a href="https://www.facebook.com/shewou.at.tijaani/" target="_blank">  
-        <img src="images/facebook_image.jpg" alt="Facebook">  
+      <a href="https://www.facebook.com/shewou.at.tijaani/" target="_blank" rel="noopener">  
+        <img src="images/facebook_image.jpg" alt="Facebook" />  
       </a>  
-      <a href="https://www.tiktok.com/@tonprofil" target="_blank">  
-        <img src="images/tik_tok_image.jpg" alt="TikTok">  
+      <a href="https://www.tiktok.com/@tonprofil" target="_blank" rel="noopener">  
+        <img src="images/tik_tok_image.jpg" alt="TikTok" />  
       </a>  
-      <a href="https://wa.me/221776362714" target="_blank">  
-        <img src="images/whatsapp_image.png" alt="WhatsApp">  
+      <a href="https://wa.me/221776362714" target="_blank" rel="noopener">  
+        <img src="images/whatsapp_image.png" alt="WhatsApp" />  
       </a>  
     </div>  
   </div>  
 
-  <!-- MODAL POUR L'IMAGE -->
   <div id="modalImage" class="modal" onclick="fermerImage()">  
     <span class="modal-close" onclick="fermerImage()">&times;</span>  
-    <img class="modal-content" id="imageZoom">  
+    <img class="modal-content" id="imageZoom" alt="Image agrandie" />  
   </div>  
 
   <script>
@@ -228,7 +280,6 @@
       imageElement.src = images[choix] || "images/ma_photo.jpg";
     }
 
-    // MODAL AVEC HISTORIQUE
     function agrandirImage(src) {
       const modal = document.getElementById("modalImage");
       const imageZoom = document.getElementById("imageZoom");
@@ -237,7 +288,8 @@
       history.pushState({ modalOpen: true }, "", "#modal");
     }
 
-    function fermerImage() {
+    function fermerImage(event) {
+      if(event) event.stopPropagation();
       const modal = document.getElementById("modalImage");
       modal.style.display = "none";
       if (location.hash === "#modal") history.back();
@@ -250,6 +302,5 @@
       }
     });
   </script>
-
 </body>  
 </html>
