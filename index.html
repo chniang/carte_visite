@@ -1,4 +1,4 @@
-<!DOCTYPE html>  
+<!DOCTYPE html>   
 <html lang="fr">  
 <head>  
   <meta charset="UTF-8">  
@@ -114,16 +114,22 @@
 
     @media (max-width: 600px) {
       .card {
-        width: 95%;
-        font-size: 18px;
+        width: 100%;
+        font-size: 20px;
       }
       .card img.photo {
-        width: 160px;
-        height: 160px;
+        width: 170px;
+        height: 170px;
+      }
+      .card h1 {
+        font-size: 28px;
+      }
+      .card p, select, #description-specialite {
+        font-size: 19px;
       }
       .social-links img {
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
       }
     }
   </style>  
@@ -205,18 +211,29 @@
       imageElement.src = images[choix] || "images/ma_photo.jpg";
     }
 
-    // FONCTION POUR AGRANDIR IMAGE
+    // MODAL AVEC HISTORIQUE
     function agrandirImage(src) {
       const modal = document.getElementById("modalImage");
       const imageZoom = document.getElementById("imageZoom");
       imageZoom.src = src;
       modal.style.display = "block";
+      history.pushState({ modalOpen: true }, "", "#modal");
     }
 
     function fermerImage() {
-      document.getElementById("modalImage").style.display = "none";
+      const modal = document.getElementById("modalImage");
+      modal.style.display = "none";
+      if (location.hash === "#modal") history.back();
     }
+
+    window.addEventListener("popstate", function(event) {
+      const modal = document.getElementById("modalImage");
+      if (modal.style.display === "block") {
+        modal.style.display = "none";
+      }
+    });
   </script>
 
 </body>  
 </html>
+
