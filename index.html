@@ -2,84 +2,158 @@
 <html lang="fr">  
 <head>  
   <meta charset="UTF-8">  
-  <title>Carte de visite - Cheikh</title>  
-  <link rel="icon" type="image/png" href="images/logo.png"> <!-- Ajout du favicon -->  
+  <title>Cheikh Niang</title>  
+  <link rel="icon" type="image/png" href="images/ma_photo.jpg">  
   <style>  
-    body {  
-      font-family: sans-serif;  
-      text-align: center;  
-      background: #f4f4f4;  
-      padding: 20px;  
-    }  
-    .card {  
-      background: white;  
-      padding: 20px;  
-      border-radius: 10px;  
-      box-shadow: 0 0 10px gray;  
-      display: inline-block;  
-      max-width: 400px;  
-      margin: auto;  
-    }  
-    .card img.photo {  
-      width: 120px;  
-      height: 120px;  
-      border-radius: 50%;  
-      object-fit: cover;  
-      margin-bottom: 15px;  
-    }  
-    .card h1 {  
-      margin-bottom: 10px;  
-    }  
-    .card p {  
-      margin: 5px;  
-    }  
-    .btn {  
-      background: #27ae60;  
-      color: white;  
-      padding: 10px 20px;  
-      text-decoration: none;  
-      border-radius: 5px;  
-      display: inline-block;  
-      margin-top: 10px;  
-    }  
-    .social-links a {  
-      display: inline-block;  
-      margin: 10px;  
-    }  
-    .social-links img {  
-      height: 40px;  
-      width: 40px;  
-      border-radius: 5px;  
-      transition: transform 0.2s;  
-    }  
-    .social-links img:hover {  
-      transform: scale(1.1);  
-    }  
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      background: linear-gradient(to right, #f9f9f9, #dbeafe);
+      padding: 20px;
+      color: #1e293b;
+    }
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      display: inline-block;
+      max-width: 420px;
+      margin: auto;
+    }
+    .card img.photo {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 20px;
+      border: 3px solid #3b82f6;
+      cursor: pointer;
+    }
+    .card h1 {
+      margin-bottom: 10px;
+      font-size: 26px;
+    }
+    .card p {
+      margin: 8px 0;
+      font-size: 18px;
+    }
+    .btn {
+      background: #3b82f6;
+      color: white;
+      padding: 12px 22px;
+      text-decoration: none;
+      border-radius: 8px;
+      display: inline-block;
+      margin-top: 12px;
+      transition: background 0.3s ease;
+    }
+    .btn:hover {
+      background: #2563eb;
+    }
+    .btn.secondary {
+      background: #10b981;
+    }
+    .btn.secondary:hover {
+      background: #059669;
+    }
+    .social-links a {
+      display: inline-block;
+      margin: 10px;
+    }
+    .social-links img {
+      height: 44px;
+      width: 44px;
+      border-radius: 5px;
+      transition: transform 0.2s ease;
+    }
+    .social-links img:hover {
+      transform: scale(1.1);
+    }
+    select {
+      font-size: 16px;
+      padding: 6px;
+      border-radius: 6px;
+      margin-top: 5px;
+    }
+    #description-specialite {
+      margin-top: 12px;
+      font-style: italic;
+      font-size: 17px;
+      color: #374151;
+    }
 
-    /* Responsive Design */
+    /* MODAL IMAGE */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 99;
+      padding-top: 60px;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+    .modal-content {
+      margin: auto;
+      display: block;
+      max-width: 90%;
+      max-height: 80vh;
+      border-radius: 10px;
+    }
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      color: #fff;
+      font-size: 30px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
     @media (max-width: 600px) {
       .card {
-        width: 90%;
-        font-size: 16px;
+        width: 95%;
+        font-size: 18px;
+      }
+      .card img.photo {
+        width: 160px;
+        height: 160px;
       }
       .social-links img {
-        width: 30px;
-        height: 30px;
+        width: 36px;
+        height: 36px;
       }
     }
   </style>  
 </head>  
 <body>  
+
   <div class="card">  
-    <!-- Ta photo -->  
-    <img src="images/ma_photo.jpg" alt="Photo de Cheikh Niang" class="photo">  
-  
+    <img id="photo-profil" src="images/ma_photo.jpg" alt="Photo de cheikh niang" class="photo" onclick="agrandirImage(this.src)">  
     <h1>Cheikh Niang</h1>  
-    <p>Data Scientist & Dév Web/Python</p>  
+    <p>Data Scientist & Dev Web/Python</p>  
+
+    <label for="specialite">Services :</label><br>  
+    <select id="specialite" onchange="afficherDescription()">  
+      <option value="">-- Sélectionner --</option>  
+      <option value="site_web">Création de site web</option>  
+      <option value="portfolio">Portfolio professionnel</option>  
+      <option value="automatisation">Automatisation de tâches (Python)</option>  
+      <option value="data_viz">Analyse & visualisation de données</option>  
+      <option value="web_scraping">Extraction de données web (scraping)</option>  
+      <option value="dashboard">Création de dashboard interactif</option>  
+      <option value="carte_visite">Carte de visite numérique</option>  
+      <option value="script_python">Développement de scripts personnalisés</option>  
+    </select>  
+
+    <p id="description-specialite"></p>  
+
     <p>Tél: <a href="https://wa.me/221776362714">+221 776362714</a></p>  
-    <p>Email: <a href="mailto:cheikh@example.com">cheikh@example.com</a></p>  
-    <p>Adresse: Médina rue 6x31, Dakar, Sénégal</p>  
-  
+    <p>Email: <a href="mailto:cheikhniang159@gmail.com">cheikhniang159@gmail.com</a></p>  
+    <p>Adresse: Geule Tape, Dakar</p>  
+
     <div class="social-links">  
       <a href="https://www.facebook.com/shewou.at.tijaani/" target="_blank">  
         <img src="images/facebook_image.jpg" alt="Facebook">  
@@ -90,12 +164,59 @@
       <a href="https://wa.me/221776362714" target="_blank">  
         <img src="images/whatsapp_image.png" alt="WhatsApp">  
       </a>  
-      <a href="https://www.instagram.com/tijaani7/" target="_blank">  
-        <img src="images/instagram_image.png" alt="Instagram">  
-      </a>  
     </div>  
-  
-    <p><a href="https://portfolio.cheikh.com" class="btn">Voir mon portfolio</a></p>  
   </div>  
+
+  <!-- MODAL POUR L'IMAGE -->
+  <div id="modalImage" class="modal" onclick="fermerImage()">  
+    <span class="modal-close" onclick="fermerImage()">&times;</span>  
+    <img class="modal-content" id="imageZoom">  
+  </div>  
+
+  <script>
+    function afficherDescription() {
+      const descriptions = {
+        site_web: "Conception de sites web modernes et responsives pour particuliers ou entreprises.",
+        portfolio: "Création de portfolios pour valoriser vos compétences ou projets.",
+        automatisation: "Développement de scripts Python pour automatiser vos tâches répétitives.",
+        data_viz: "Analyse de données avec graphiques clairs et rapports visuels interactifs.",
+        web_scraping: "Récupération automatisée de données à partir de sites web.",
+        dashboard: "Tableaux de bord dynamiques pour le suivi de vos données (avec Streamlit ou Dash).",
+        carte_visite: "Création de cartes de visite numériques personnalisées et interactives.",
+        script_python: "Développement de solutions Python adaptées à vos besoins spécifiques."
+      };
+
+      const images = {
+        site_web: "images/site_web.png",
+        portfolio: "images/portfolio.webp",
+        automatisation: "images/automatisation.jpg",
+        data_viz: "images/data_viz.png",
+        web_scraping: "images/web_scraping.jpg",
+        dashboard: "images/dashboard.jpg",
+        carte_visite: "images/carte_visite.png",
+        script_python: "images/script_python.jpg"
+      };
+
+      const choix = document.getElementById("specialite").value;
+      const descElement = document.getElementById("description-specialite");
+      const imageElement = document.getElementById("photo-profil");
+
+      descElement.textContent = descriptions[choix] || "";
+      imageElement.src = images[choix] || "images/ma_photo.jpg";
+    }
+
+    // FONCTION POUR AGRANDIR IMAGE
+    function agrandirImage(src) {
+      const modal = document.getElementById("modalImage");
+      const imageZoom = document.getElementById("imageZoom");
+      imageZoom.src = src;
+      modal.style.display = "block";
+    }
+
+    function fermerImage() {
+      document.getElementById("modalImage").style.display = "none";
+    }
+  </script>
+
 </body>  
 </html>
