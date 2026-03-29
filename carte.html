@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CarteViz — Carte de visite</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <!-- QR Code -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:      #0a0a14;
+      --surface: #12122a;
+      --surface2:#1a1a35;
+      --border:  rgba(139,92,246,0.18);
+      --accent:  #a78bfa;
+      --accent2: #818cf8;
+      --green:   #34d399;
+      --text:    #f1f0ff;
+      --muted:   #a0a0c0;
+      --jakarta: 'Plus Jakarta Sans', sans-serif;
+      --dm:      'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--dm);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 4rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 20%, rgba(139,92,246,0.12), transparent),
+        radial-gradient(ellipse 50% 40% at 80% 80%, rgba(129,140,248,0.08), transparent);
+      pointer-events: none;
+    }
+
+    /* ─── LOADING ─── */
+    #loading {
+      position: fixed; inset: 0; z-index: 100;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 1rem;
+    }
+    .load-logo { font-family: var(--jakarta); font-size: 1.5rem; font-weight: 800; }
+    .load-logo span { color: var(--accent); }
+    .load-spinner {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(167,139,250,0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── ERROR ─── */
+    #error-page {
+      display: none; flex-direction: column; align-items: center;
+      text-align: center; gap: 1rem; padding: 3rem 1rem;
+      position: relative; z-index: 1;
+    }
+    #error-page .err-icon { font-size: 3rem; }
+    #error-page h2 { font-family: var(--jakarta); font-size: 1.5rem; font-weight: 700; }
+    #error-page p { color: var(--muted); font-size: .95rem; }
+    #error-page a {
+      margin-top: .5rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; font-weight: 700; padding: .7rem 1.5rem;
+      border-radius: 10px; text-decoration: none; font-size: .9rem;
+    }
+
+    /* ─── CARTE ─── */
+    #carte {
+      display: none; width: 100%; max-width: 460px;
+      position: relative; z-index: 1;
+      animation: fadeUp .5s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header */
+    .carte-header {
+      background: linear-gradient(145deg, #16143a, #12122a);
+      border: 1px solid var(--border);
+      border-radius: 24px 24px 0 0;
+      padding: 2.5rem 2rem 2rem;
+      position: relative; overflow: hidden; text-align: center;
+    }
+    .carte-header::before {
+      content: '';
+      position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+      width: 300px; height: 200px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(139,92,246,0.2), transparent);
+      pointer-events: none;
+    }
+
+    .vues-badge {
+      position: absolute; top: 1rem; right: 1rem;
+      display: flex; align-items: center; gap: .35rem;
+      background: rgba(139,92,246,0.12);
+      border: 1px solid rgba(139,92,246,0.25);
+      padding: .25rem .7rem; border-radius: 999px;
+      font-size: .72rem; color: var(--accent); font-weight: 600;
+    }
+    .vues-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
+
+    .avatar-wrap {
+      width: 90px; height: 90px; border-radius: 50%;
+      margin: 0 auto 1.25rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      padding: 3px; position: relative; z-index: 1;
+    }
+    .avatar-inner {
+      width: 100%; height: 100%; border-radius: 50%;
+      background: #1a1a35;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--jakarta); font-size: 2rem; font-weight: 800;
+      color: var(--accent); overflow: hidden;
+    }
+    .avatar-inner img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+    .carte-name {
+      font-family: var(--jakarta); font-size: 1.6rem; font-weight: 800;
+      letter-spacing: -.03em; line-height: 1.1; margin-bottom: .35rem;
+    }
+    .carte-titre {
+      font-size: .88rem; font-weight: 500;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: .75rem;
+    }
+    .carte-bio {
+      font-size: .88rem; color: var(--muted);
+      line-height: 1.6; max-width: 340px; margin: 0 auto;
+    }
+
+    /* Body */
+    .carte-body {
+      background: var(--surface);
+      border: 1px solid var(--border); border-top: none;
+      padding: 1.5rem 2rem;
+    }
+
+    .carte-section { margin-bottom: 1.5rem; }
+    .carte-section:last-child { margin-bottom: 0; }
+    .section-sep { border: none; border-top: 1px solid var(--border); margin-bottom: 1.25rem; }
+    .sec-label {
+      font-size: .7rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: .75rem; display: block;
+    }
+
+    /* Contacts */
+    .contact-list { display: flex; flex-direction: column; gap: .6rem; }
+    .contact-item {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .65rem .9rem; border-radius: 10px;
+      background: var(--surface2); border: 1px solid var(--border);
+      text-decoration: none; color: var(--text); font-size: .88rem;
+      transition: all .2s;
+    }
+    .contact-item:hover { border-color: rgba(139,92,246,0.4); background: rgba(139,92,246,0.06); }
+    .contact-icon { font-size: 1.1rem; flex-shrink: 0; width: 24px; text-align: center; }
+    .contact-label { font-size: .72rem; color: var(--muted); display: block; line-height: 1; margin-bottom: .1rem; }
+    .contact-val { font-size: .88rem; font-weight: 500; }
+
+    /* Services */
+    .services-chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .service-tag {
+      padding: .35rem .85rem; border-radius: 999px;
+      background: rgba(139,92,246,0.1);
+      border: 1px solid rgba(139,92,246,0.25);
+      font-size: .78rem; font-weight: 500; color: var(--accent);
+    }
+
+    /* Réseaux */
+    .socials { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .social-btn {
+      display: flex; align-items: center; gap: .4rem;
+      padding: .4rem .9rem; border-radius: 8px;
+      background: var(--surface2); border: 1px solid var(--border);
+      text-decoration: none; color: var(--muted);
+      font-size: .8rem; font-weight: 500; transition: all .2s;
+    }
+    .social-btn:hover { border-color: rgba(139,92,246,0.4); color: var(--accent); }
+
+    /* Footer */
+    .carte-footer {
+      background: var(--surface);
+      border: 1px solid var(--border); border-top: none;
+      border-radius: 0 0 24px 24px;
+      padding: 1.5rem 2rem 2rem;
+    }
+    .btn-wa {
+      display: flex; align-items: center; justify-content: center; gap: .6rem;
+      width: 100%; padding: 1rem;
+      background: linear-gradient(135deg, #25d366, #128c7e);
+      color: #fff; font-family: var(--jakarta);
+      font-weight: 700; font-size: 1rem;
+      border-radius: 12px; text-decoration: none;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 4px 20px rgba(37,211,102,0.3);
+    }
+    .btn-wa:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(37,211,102,0.4); }
+
+    /* QR */
+    .qr-section {
+      margin-top: 1.25rem;
+      display: flex; flex-direction: column; align-items: center; gap: .75rem;
+    }
+    .qr-label { font-size: .78rem; color: var(--muted); text-align: center; }
+    #qr-container {
+      background: #fff; border-radius: 12px; padding: 12px;
+      display: inline-block;
+    }
+    .btn-dl-qr {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .45rem 1.1rem; border-radius: 8px;
+      background: rgba(139,92,246,0.1);
+      border: 1px solid rgba(139,92,246,0.3);
+      color: var(--accent); font-size: .82rem; font-weight: 600;
+      cursor: pointer; text-decoration: none; transition: all .2s;
+    }
+    .btn-dl-qr:hover { background: rgba(139,92,246,0.18); }
+
+    /* Branding */
+    .carte-brand { margin-top: 2rem; text-align: center; }
+    .carte-brand a {
+      font-family: var(--jakarta); font-size: .82rem;
+      color: var(--muted); text-decoration: none; transition: color .2s;
+    }
+    .carte-brand a span { color: var(--accent); }
+    .carte-brand a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="load-logo">Carte<span>Viz</span></div>
+  <div class="load-spinner"></div>
+</div>
+
+<div id="error-page">
+  <div class="err-icon">🔍</div>
+  <h2>Carte introuvable</h2>
+  <p id="error-msg">Cette carte de visite n'existe pas ou a été supprimée.</p>
+  <a href="index_saas.html">Créer ma carte gratuitement →</a>
+</div>
+
+<div id="carte">
+
+  <div class="carte-header">
+    <div class="vues-badge">
+      <span class="vues-dot"></span>
+      <span id="vues-count">0</span> vue<span id="vues-s"></span>
+    </div>
+    <div class="avatar-wrap">
+      <div class="avatar-inner" id="avatar">?</div>
+    </div>
+    <h1 class="carte-name" id="carte-name">—</h1>
+    <div class="carte-titre" id="carte-titre"></div>
+    <p class="carte-bio" id="carte-bio" style="display:none"></p>
+  </div>
+
+  <div class="carte-body">
+
+    <div class="carte-section">
+      <span class="sec-label">Contact</span>
+      <div class="contact-list" id="contact-list"></div>
+    </div>
+
+    <div class="carte-section" id="section-services" style="display:none">
+      <hr class="section-sep" />
+      <span class="sec-label">Mes services</span>
+      <div class="services-chips" id="services-list"></div>
+    </div>
+
+    <div class="carte-section" id="section-socials" style="display:none">
+      <hr class="section-sep" />
+      <span class="sec-label">Retrouvez-moi sur</span>
+      <div class="socials" id="socials-list"></div>
+    </div>
+
+  </div>
+
+  <div class="carte-footer">
+    <a class="btn-wa" id="btn-wa" href="#" target="_blank">
+      💬 &nbsp;Contacter sur WhatsApp
+    </a>
+    <div class="qr-section">
+      <p class="qr-label">📲 Scannez pour partager cette carte</p>
+      <div id="qr-container"></div>
+      <span class="btn-dl-qr" onclick="downloadQR()">⬇️ Télécharger le QR code</span>
+    </div>
+  </div>
+
+  <div class="carte-brand">
+    <a href="index_saas.html">Créez votre carte sur <span>CarteViz</span> — gratuit</a>
+  </div>
+
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey:            "AIzaSyDZbf0-9QLpk0fqQhgKas0d-PbqpPZHfw8",
+  authDomain:        "carteviz.firebaseapp.com",
+  projectId:         "carteviz",
+  storageBucket:     "carteviz.firebasestorage.app",
+  messagingSenderId: "891996442394",
+  appId:             "1:891996442394:web:8558489da54b398cdf66a3",
+  measurementId:     "G-650D2N7WD8"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+function getSlug() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('slug')) return params.get('slug');
+  const hash = window.location.hash.replace('#','');
+  if (hash) return hash;
+  const parts = window.location.pathname.split('/').filter(Boolean);
+  const last = parts[parts.length - 1];
+  return (last && last !== 'carte.html') ? last : null;
+}
+
+function showError(msg) {
+  document.getElementById('loading').style.display = 'none';
+  const ep = document.getElementById('error-page');
+  ep.style.display = 'flex';
+  if (msg) document.getElementById('error-msg').textContent = msg;
+}
+
+function initials(prenom, nom) {
+  return [(prenom||'')[0],(nom||'')[0]].filter(Boolean).join('').toUpperCase() || '?';
+}
+
+async function loadCarte() {
+  const slug = getSlug();
+  if (!slug) { showError("Aucun identifiant dans l'URL. Vérifiez le lien."); return; }
+
+  try {
+    const doc = await db.collection('cartes').doc(slug).get();
+    if (!doc.exists) { showError(`La carte "${slug}" n'existe pas.`); return; }
+
+    const d = doc.data();
+
+    // Incrémenter vues
+    db.collection('cartes').doc(slug).update({
+      vues: firebase.firestore.FieldValue.increment(1)
+    }).catch(()=>{});
+
+    const fullName = `${d.prenom||''} ${d.nom||''}`.trim();
+    document.title = `${fullName} — CarteViz`;
+
+    // Avatar
+    const avatarEl = document.getElementById('avatar');
+    if (d.photo) {
+      avatarEl.innerHTML = `<img src="${d.photo}" alt="${fullName}" onerror="this.parentNode.textContent='${initials(d.prenom,d.nom)}'" />`;
+    } else {
+      avatarEl.textContent = initials(d.prenom, d.nom);
+    }
+
+    // Nom / titre / bio
+    document.getElementById('carte-name').textContent = fullName || '—';
+    document.getElementById('carte-titre').textContent = d.titre || '';
+    if (d.bio) {
+      const b = document.getElementById('carte-bio');
+      b.textContent = d.bio; b.style.display = 'block';
+    }
+
+    // Vues
+    const vues = (d.vues||0) + 1;
+    document.getElementById('vues-count').textContent = vues;
+    document.getElementById('vues-s').textContent = vues > 1 ? 's' : '';
+
+    // Contacts
+    const contacts = [];
+    if (d.tel)   contacts.push({ href:`https://wa.me/${d.tel.replace(/\D/g,'')}`, icon:'📱', label:'WhatsApp / Téléphone', val:d.tel });
+    if (d.email) contacts.push({ href:`mailto:${d.email}`, icon:'✉️', label:'Email', val:d.email });
+    if (d.lieu)  contacts.push({ href:`https://maps.google.com?q=${encodeURIComponent(d.lieu)}`, icon:'📍', label:'Localisation', val:d.lieu, blank:true });
+
+    document.getElementById('contact-list').innerHTML = contacts.map(c=>
+      `<a class="contact-item" href="${c.href}" ${c.blank?'target="_blank"':''}>
+        <span class="contact-icon">${c.icon}</span>
+        <div><span class="contact-label">${c.label}</span><span class="contact-val">${c.val}</span></div>
+      </a>`
+    ).join('');
+
+    // Services
+    const services = d.services || [];
+    if (services.length > 0) {
+      document.getElementById('section-services').style.display = 'block';
+      document.getElementById('services-list').innerHTML =
+        services.map(s=>`<span class="service-tag">${s}</span>`).join('');
+    }
+
+    // Réseaux
+    const socials = [];
+    if (d.github)    socials.push({ href:d.github,    icon:'🐙', label:'GitHub' });
+    if (d.linkedin)  socials.push({ href:d.linkedin,  icon:'💼', label:'LinkedIn' });
+    if (d.portfolio) socials.push({ href:d.portfolio, icon:'🌐', label:'Portfolio' });
+    if (socials.length > 0) {
+      document.getElementById('section-socials').style.display = 'block';
+      document.getElementById('socials-list').innerHTML = socials.map(s=>
+        `<a class="social-btn" href="${s.href}" target="_blank"><span>${s.icon}</span>${s.label}</a>`
+      ).join('');
+    }
+
+    // WhatsApp CTA
+    if (d.tel) {
+      const msg = encodeURIComponent(`Bonjour ${d.prenom||''}, j'ai vu votre carte CarteViz et je suis intéressé(e) par vos services.`);
+      document.getElementById('btn-wa').href = `https://wa.me/${d.tel.replace(/\D/g,'')}?text=${msg}`;
+    } else {
+      document.getElementById('btn-wa').style.display = 'none';
+    }
+
+    // QR Code
+    const carteURL = `${window.location.origin}${window.location.pathname}?slug=${slug}`;
+    new QRCode(document.getElementById('qr-container'), {
+      text: carteURL, width: 160, height: 160,
+      colorDark: '#1a0a3a', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+    window._slug = slug;
+
+    // Afficher
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('carte').style.display = 'block';
+
+  } catch(err) {
+    console.error(err);
+    showError('Erreur de connexion. Vérifiez votre connexion internet.');
+  }
+}
+
+function downloadQR() {
+  const canvas = document.querySelector('#qr-container canvas');
+  if (!canvas) return;
+  const a = document.createElement('a');
+  a.download = `qr-${window._slug||'carte'}.png`;
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+
+loadCarte();
+</script>
+</body>
+</html>
