@@ -868,6 +868,46 @@
       display: none;
     }
 
+
+    /* ─── LIENS DYNAMIQUES ─── */
+    .btn-add-lien {
+      background: rgba(167,139,250,0.1);
+      border: 1px dashed rgba(167,139,250,0.35);
+      color: var(--accent); font-family: var(--dm);
+      font-size: .85rem; font-weight: 600;
+      padding: .55rem 1rem; border-radius: 8px;
+      cursor: pointer; transition: all .2s; width: 100%;
+      text-align: center;
+    }
+    .btn-add-lien:hover { background: rgba(167,139,250,0.18); }
+
+    .lien-row {
+      display: flex; gap: .5rem; align-items: center;
+    }
+    .lien-select {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-family: var(--dm); font-size: .85rem;
+      padding: .6rem .75rem; flex-shrink: 0; width: 140px;
+      outline: none; transition: border-color .2s;
+    }
+    .lien-select:focus { border-color: rgba(167,139,250,0.5); }
+    .lien-input {
+      flex: 1; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-family: var(--dm); font-size: .85rem;
+      padding: .6rem .85rem; outline: none;
+      transition: border-color .2s;
+    }
+    .lien-input:focus { border-color: rgba(167,139,250,0.5); box-shadow: 0 0 0 3px rgba(167,139,250,0.1); }
+    .lien-input::placeholder { color: var(--muted); opacity: .6; }
+    .btn-remove-lien {
+      background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);
+      color: #f87171; border-radius: 8px; padding: .6rem .75rem;
+      cursor: pointer; font-size: .85rem; flex-shrink: 0; transition: all .2s;
+    }
+    .btn-remove-lien:hover { background: rgba(239,68,68,0.2); }
+
     /* ─── FOOTER ─── */
     footer {
       position: relative; z-index: 1;
@@ -1143,22 +1183,16 @@
 
           <hr class="form-divider"<hr class="form-divider" />
 
-          <!-- Réseaux -->
-          <div class="form-row">
-            <div class="field">
-              <label>GitHub URL</label>
-              <input type="url" id="f-github" placeholder="https://github.com/…" />
-            </div>
-            <div class="field">
-              <label>LinkedIn URL</label>
-              <input type="url" id="f-linkedin" placeholder="https://linkedin.com/in/…" />
-            </div>
+          <!-- Liens dynamiques -->
+          <div class="services-group">
+            <span class="services-label">Mes liens &amp; réseaux sociaux</span>
+            <div id="liens-container" style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:.75rem"></div>
+            <button type="button" class="btn-add-lien" onclick="addLien()">+ Ajouter un lien</button>
           </div>
+
+          <hr class="form-divider" />
+
           <div class="form-row">
-            <div class="field">
-              <label>Portfolio URL</label>
-              <input type="url" id="f-portfolio" placeholder="https://monsite.vercel.app" />
-            </div>
             <div class="field">
               <label>Photo de profil (optionnel)</label>
               <div class="photo-upload-wrap" id="photo-upload-wrap">
@@ -1468,9 +1502,9 @@
     const tel      = document.getElementById('f-tel').value.trim();
     const email    = document.getElementById('f-email').value.trim();
     const lieu     = document.getElementById('f-lieu').value.trim();
-    const github   = document.getElementById('f-github').value.trim();
-    const linkedin = document.getElementById('f-linkedin').value.trim();
-    const portfolio= document.getElementById('f-portfolio').value.trim();
+    const github   = '';
+    const linkedin = '';
+    const portfolio= '';
     const photo    = document.getElementById('f-photo').value.trim();
     const services = getSelectedServices();
 
@@ -1501,31 +1535,37 @@
     btn.disabled = true;
 
     try {
-      // Vérifier si le slug existe déjà
-      const existing = await db.collection('cartes').doc(slug).get();
-      if (existing.exists) {
-        throw new Error(`Le nom "${slug}" est déjà pris. Essaie avec un préfixe (ex: cheikh2-niang).`);
+      // Trouver un slug disponible (auto-incrément si déjà pris)
+      let finalSlug = slug;
+      let counter = 1;
+      while (true) {
+        const existing = await db.collection('cartes').doc(finalSlug).get();
+        if (!existing.exists) break;
+        counter++;
+        finalSlug = `${slug}-${counter}`;
       }
+      const slug2 = finalSlug; // slug final disponible
 
       // Générer un token propriétaire unique
       const token = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
 
       // Données à sauvegarder
       const carteData = {
-        slug, prenom, nom, titre, bio, tel,
+        slug: slug2, prenom, nom, titre, bio, tel,
         email, lieu, github, linkedin, portfolio, photo,
         services,
+        liens: getLiens(),
         owner_token: token,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         vues: 0,
         clics_whatsapp: 0
       };
 
-      await db.collection('cartes').doc(slug).set(carteData);
+      await db.collection('cartes').doc(slug2).set(carteData);
 
       // Succès
       const baseUrl = window.location.origin + window.location.pathname.replace('index_saas.html','');
-      const url = `${baseUrl}carte.html?slug=${slug}`;
+      const url = `${baseUrl}carte.html?slug=${slug2}`;
       const ownerUrl = `${window.location.origin}${window.location.pathname.replace('index_saas.html','').replace('carte.html','')}carte.html?slug=${slug}&owner=${token}`;
       alert.className = 'success';
       alert.style.display = 'block';
@@ -1899,6 +1939,74 @@
     updatePreview();
   }
   // ── END PHOTO UPLOAD ─────────────────────────────────────────
+
+
+  // ── LIENS DYNAMIQUES ────────────────────────────────────────
+  const PLATEFORMES = [
+    { val: 'facebook',   label: '📘 Facebook',   ph: 'https://facebook.com/...' },
+    { val: 'instagram',  label: '📸 Instagram',  ph: 'https://instagram.com/...' },
+    { val: 'tiktok',     label: '🎵 TikTok',     ph: 'https://tiktok.com/@...' },
+    { val: 'youtube',    label: '▶️ YouTube',    ph: 'https://youtube.com/@...' },
+    { val: 'whatsapp',   label: '💬 WhatsApp',   ph: 'https://wa.me/221...' },
+    { val: 'linkedin',   label: '💼 LinkedIn',   ph: 'https://linkedin.com/in/...' },
+    { val: 'github',     label: '🐙 GitHub',     ph: 'https://github.com/...' },
+    { val: 'portfolio',  label: '🌐 Site Web',   ph: 'https://monsite.com' },
+    { val: 'twitter',    label: '🐦 Twitter/X',  ph: 'https://x.com/...' },
+    { val: 'snapchat',   label: '👻 Snapchat',   ph: 'https://snapchat.com/add/...' },
+    { val: 'autre',      label: '🔗 Autre lien', ph: 'https://...' },
+  ];
+
+  let lienCount = 0;
+
+  function addLien(plateforme = '', url = '') {
+    const id = lienCount++;
+    const options = PLATEFORMES.map(p =>
+      `<option value="${p.val}" ${plateforme === p.val ? 'selected' : ''}>${p.label}</option>`
+    ).join('');
+    const ph = PLATEFORMES.find(p => p.val === plateforme)?.ph || 'https://...';
+
+    const row = document.createElement('div');
+    row.className = 'lien-row';
+    row.id = `lien-row-${id}`;
+    row.innerHTML = `
+      <select class="lien-select" id="lien-type-${id}" onchange="updatePlaceholder(${id})">
+        ${options}
+      </select>
+      <input type="url" class="lien-input" id="lien-url-${id}" placeholder="${ph}" value="${url}" oninput="updatePreview()" />
+      <button type="button" class="btn-remove-lien" onclick="removeLien(${id})">✕</button>
+    `;
+    document.getElementById('liens-container').appendChild(row);
+    updatePreview();
+  }
+
+  function removeLien(id) {
+    const row = document.getElementById(`lien-row-${id}`);
+    if (row) row.remove();
+    updatePreview();
+  }
+
+  function updatePlaceholder(id) {
+    const type = document.getElementById(`lien-type-${id}`).value;
+    const ph = PLATEFORMES.find(p => p.val === type)?.ph || 'https://...';
+    document.getElementById(`lien-url-${id}`).placeholder = ph;
+    updatePreview();
+  }
+
+  function getLiens() {
+    const liens = [];
+    document.querySelectorAll('.lien-row').forEach(row => {
+      const id = row.id.replace('lien-row-', '');
+      const type = document.getElementById(`lien-type-${id}`)?.value;
+      const url = document.getElementById(`lien-url-${id}`)?.value.trim();
+      if (url) liens.push({ type, url });
+    });
+    return liens;
+  }
+
+  // Ajouter les liens par défaut au chargement
+  addLien('facebook', '');
+  addLien('instagram', '');
+  // ── END LIENS DYNAMIQUES ─────────────────────────────────────
 
   // Init preview
   updatePreview();
