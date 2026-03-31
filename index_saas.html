@@ -1815,39 +1815,49 @@
     const file = event.target.files[0];
     if (!file) return;
 
-    // Vérifications
-    if (file.size > 5 * 1024 * 1024) {
-      alert('La photo est trop lourde (max 5 MB). Choisissez une photo plus légère.');
-      return;
-    }
     if (!file.type.startsWith('image/')) {
       alert('Veuillez choisir une image (JPG, PNG, etc.)');
       return;
     }
 
-    // Prévisualisation immédiate
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const preview = document.getElementById('photo-preview');
-      preview.innerHTML = `<img src="${e.target.result}" alt="preview" />`;
-      preview.classList.add('has-photo');
-      document.getElementById('btn-photo-remove').style.display = 'block';
-    };
-    reader.readAsDataURL(file);
+    // Compresser et prévisualiser
+    compressAndStore(file);
+  }
 
-    // Upload vers Firebase Storage si disponible
-    if (window.storage) {
-      uploadPhotoToStorage(file);
-    } else {
-      // Fallback base64
-      const reader2 = new FileReader();
-      reader2.onload = (e) => {
-        uploadedPhotoUrl = e.target.result;
-        document.getElementById('f-photo').value = uploadedPhotoUrl;
+  function compressAndStore(file) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      img.onload = () => {
+        // Redimensionner à max 300x300 px
+        const MAX = 300;
+        let w = img.width, h = img.height;
+        if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
+        else { if (h > MAX) { w = w * MAX / h; h = MAX; } }
+        canvas.width = Math.round(w);
+        canvas.height = Math.round(h);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        // Qualité 0.7 → image légère ~15-30 KB
+        const compressed = canvas.toDataURL('image/jpeg', 0.7);
+
+        // Prévisualisation
+        const preview = document.getElementById('photo-preview');
+        preview.innerHTML = `<img src="${compressed}" alt="preview" />`;
+        preview.classList.add('has-photo');
+        document.getElementById('btn-photo-remove').style.display = 'block';
+
+        // Stocker
+        uploadedPhotoUrl = compressed;
+        document.getElementById('f-photo').value = compressed;
         updatePreview();
       };
-      reader2.readAsDataURL(file);
-    }
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
   async function uploadPhotoToStorage(file) {
