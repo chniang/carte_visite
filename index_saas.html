@@ -1452,11 +1452,15 @@
         throw new Error(`Le nom "${slug}" est déjà pris. Essaie avec un préfixe (ex: cheikh2-niang).`);
       }
 
+      // Générer un token propriétaire unique
+      const token = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+
       // Données à sauvegarder
       const carteData = {
         slug, prenom, nom, titre, bio, tel,
         email, lieu, github, linkedin, portfolio, photo,
         services,
+        owner_token: token,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         vues: 0,
         clics_whatsapp: 0
@@ -1472,6 +1476,11 @@
         🎉 <strong>Votre carte est en ligne !</strong><br/>
         Partagez ce lien par WhatsApp :<br/>
         <a class="alert-url" href="${url}" target="_blank">${url}</a>
+        <div style="margin-top:.75rem;padding:.75rem;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.3);border-radius:8px;">
+          <div style="font-size:.78rem;color:#a0a0c0;margin-bottom:.35rem;">🔐 Votre lien privé (dashboard + stats) — à garder précieusement :</div>
+          <a class="alert-url" href="${ownerUrl}" target="_blank" style="color:#a78bfa">${ownerUrl}</a>
+          <div style="font-size:.72rem;color:#a0a0c0;margin-top:.35rem;">⚠️ Sauvegardez ce lien dans vos favoris ou sur WhatsApp. Il ne sera plus affiché.</div>
+        </div>
       `;
 
       // Optionnel : reset form

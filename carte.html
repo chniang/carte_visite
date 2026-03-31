@@ -254,6 +254,112 @@
     }
     .carte-brand a span { color: var(--accent); }
     .carte-brand a:hover { color: var(--text); }
+
+    /* ─── DASHBOARD ─── */
+    #dashboard-section {
+      display: none;
+      width: 100%; max-width: 460px;
+      position: relative; z-index: 1;
+      margin-top: 1.5rem;
+      animation: fadeUp .4s ease both;
+    }
+    .dash-header {
+      background: linear-gradient(145deg, #1a1135, #12122a);
+      border: 1px solid rgba(167,139,250,0.3);
+      border-radius: 20px 20px 0 0;
+      padding: 1.5rem 2rem 1.25rem;
+      display: flex; align-items: center; gap: .75rem;
+    }
+    .dash-header h2 {
+      font-family: var(--jakarta); font-size: 1.1rem; font-weight: 700;
+      color: var(--text); margin: 0;
+    }
+    .dash-header .dash-icon { font-size: 1.3rem; }
+    .dash-body {
+      background: var(--surface);
+      border: 1px solid rgba(167,139,250,0.2); border-top: none;
+      border-radius: 0 0 20px 20px;
+      padding: 1.5rem 2rem;
+    }
+
+    /* Metric cards */
+    .metrics-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: .75rem; margin-bottom: 1.5rem;
+    }
+    .metric-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 1rem;
+      text-align: center;
+    }
+    .metric-val {
+      font-family: var(--jakarta); font-size: 1.8rem; font-weight: 800;
+      color: var(--accent); line-height: 1;
+    }
+    .metric-label {
+      font-size: .72rem; color: var(--muted);
+      margin-top: .3rem; text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    /* Sections stats */
+    .dash-section { margin-bottom: 1.5rem; }
+    .dash-section-title {
+      font-size: .72rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: .75rem; display: block;
+    }
+
+    /* Bar chart */
+    .bar-item {
+      display: flex; align-items: center; gap: .75rem;
+      margin-bottom: .5rem;
+    }
+    .bar-label { font-size: .8rem; color: var(--text); min-width: 100px; }
+    .bar-track {
+      flex: 1; height: 8px; border-radius: 4px;
+      background: var(--surface2); overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%; border-radius: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width .6s ease;
+    }
+    .bar-count { font-size: .78rem; color: var(--muted); min-width: 24px; text-align: right; }
+
+    /* Visites récentes */
+    .visite-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .6rem 0; border-bottom: 1px solid var(--border);
+      font-size: .82rem;
+    }
+    .visite-item:last-child { border-bottom: none; }
+    .visite-left { display: flex; align-items: center; gap: .5rem; }
+    .visite-flag { font-size: 1rem; }
+    .visite-info { color: var(--text); }
+    .visite-sub { font-size: .72rem; color: var(--muted); }
+    .visite-time { font-size: .72rem; color: var(--muted); }
+
+    /* Bouton dashboard toggle */
+    .btn-dashboard {
+      display: none;
+      width: 100%; margin-top: 1rem;
+      padding: .75rem; border-radius: 10px;
+      background: rgba(167,139,250,0.1);
+      border: 1px solid rgba(167,139,250,0.3);
+      color: var(--accent); font-family: var(--jakarta);
+      font-weight: 700; font-size: .88rem;
+      cursor: pointer; transition: all .2s; text-align: center;
+    }
+    .btn-dashboard:hover { background: rgba(167,139,250,0.18); }
+
+    /* Aucune donnée */
+    .empty-state {
+      text-align: center; padding: 1.5rem;
+      font-size: .85rem; color: var(--muted);
+    }
+
   </style>
 </head>
 <body>
@@ -317,7 +423,60 @@
     </div>
   </div>
 
-  <div class="carte-brand">
+  
+<!-- ─── BOUTON DASHBOARD (visible owner seulement) ─── -->
+<button class="btn-dashboard" id="btn-dashboard" onclick="toggleDashboard()">
+  📊 Voir mes statistiques
+</button>
+
+<!-- ─── DASHBOARD ─── -->
+<div id="dashboard-section">
+  <div class="dash-header">
+    <span class="dash-icon">📊</span>
+    <h2>Mes statistiques</h2>
+  </div>
+  <div class="dash-body">
+
+    <!-- Métriques principales -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-val" id="d-vues">—</div>
+        <div class="metric-label">Vues totales</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val" id="d-wa">—</div>
+        <div class="metric-label">Clics WhatsApp</div>
+      </div>
+    </div>
+
+    <!-- Appareils -->
+    <div class="dash-section">
+      <span class="dash-section-title">📱 Appareils</span>
+      <div id="d-devices"><div class="empty-state">Chargement...</div></div>
+    </div>
+
+    <!-- Sources -->
+    <div class="dash-section">
+      <span class="dash-section-title">🔗 Sources de trafic</span>
+      <div id="d-sources"><div class="empty-state">Chargement...</div></div>
+    </div>
+
+    <!-- Pays -->
+    <div class="dash-section">
+      <span class="dash-section-title">🌍 Pays visiteurs</span>
+      <div id="d-countries"><div class="empty-state">Chargement...</div></div>
+    </div>
+
+    <!-- Visites récentes -->
+    <div class="dash-section">
+      <span class="dash-section-title">🕐 Dernières visites</span>
+      <div id="d-recent"><div class="empty-state">Chargement...</div></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="carte-brand">
     <a href="index_saas.html">Créez votre carte sur <span>CarteViz</span> — gratuit</a>
   </div>
 
@@ -347,6 +506,55 @@ function getSlug() {
   return (last && last !== 'carte.html') ? last : null;
 }
 
+function getOwnerToken() {
+  return new URLSearchParams(window.location.search).get('owner');
+}
+
+function detectSource() {
+  const ref = document.referrer.toLowerCase();
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('src') === 'qr') return 'QR Code';
+  if (ref.includes('whatsapp')) return 'WhatsApp';
+  if (ref.includes('facebook')) return 'Facebook';
+  if (ref.includes('instagram')) return 'Instagram';
+  if (ref.includes('linkedin')) return 'LinkedIn';
+  if (ref.includes('twitter') || ref.includes('x.com')) return 'Twitter/X';
+  if (ref === '') return 'Lien direct';
+  return 'Autre';
+}
+
+function detectDevice() {
+  return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+}
+
+async function getCountry() {
+  try {
+    const r = await fetch('https://ipapi.co/json/');
+    const d = await r.json();
+    return { country: d.country_name || 'Inconnu', city: d.city || '', flag: d.country_code || '' };
+  } catch {
+    return { country: 'Inconnu', city: '', flag: '' };
+  }
+}
+
+async function recordVisit(slug) {
+  try {
+    const geo = await getCountry();
+    const visitData = {
+      slug,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      device: detectDevice(),
+      source: detectSource(),
+      country: geo.country,
+      city: geo.city,
+      country_code: geo.flag
+    };
+    await db.collection('visites').add(visitData);
+  } catch(e) {
+    console.log('Visit recording skipped:', e.message);
+  }
+}
+
 function showError(msg) {
   document.getElementById('loading').style.display = 'none';
   const ep = document.getElementById('error-page');
@@ -368,10 +576,19 @@ async function loadCarte() {
 
     const d = doc.data();
 
-    // Incrémenter vues
+    // Incrémenter vues + enregistrer la visite
     db.collection('cartes').doc(slug).update({
       vues: firebase.firestore.FieldValue.increment(1)
     }).catch(()=>{});
+    recordVisit(slug);
+
+    // Vérifier si c'est le propriétaire
+    const ownerToken = getOwnerToken();
+    if (ownerToken && ownerToken === d.owner_token) {
+      document.getElementById('btn-dashboard').style.display = 'block';
+      window._isOwner = true;
+      window._slug = slug;
+    }
 
     const fullName = `${d.prenom||''} ${d.nom||''}`.trim();
     document.title = `${fullName} — CarteViz`;
@@ -430,10 +647,17 @@ async function loadCarte() {
       ).join('');
     }
 
-    // WhatsApp CTA
+    // WhatsApp CTA + tracker clics
     if (d.tel) {
       const msg = encodeURIComponent(`Bonjour ${d.prenom||''}, j'ai vu votre carte CarteViz et je suis intéressé(e) par vos services.`);
-      document.getElementById('btn-wa').href = `https://wa.me/${d.tel.replace(/\D/g,'')}?text=${msg}`;
+      const waUrl = `https://wa.me/${d.tel.replace(/\D/g,'')}?text=${msg}`;
+      const btnWa = document.getElementById('btn-wa');
+      btnWa.href = waUrl;
+      btnWa.addEventListener('click', () => {
+        db.collection('cartes').doc(slug).update({
+          clics_whatsapp: firebase.firestore.FieldValue.increment(1)
+        }).catch(()=>{});
+      });
     } else {
       document.getElementById('btn-wa').style.display = 'none';
     }
@@ -465,6 +689,127 @@ function downloadQR() {
   a.href = canvas.toDataURL('image/png');
   a.click();
 }
+
+
+// ── DASHBOARD ───────────────────────────────────────────────
+let dashLoaded = false;
+
+function toggleDashboard() {
+  const section = document.getElementById('dashboard-section');
+  const btn = document.getElementById('btn-dashboard');
+  if (section.style.display === 'block') {
+    section.style.display = 'none';
+    btn.textContent = '📊 Voir mes statistiques';
+  } else {
+    section.style.display = 'block';
+    btn.textContent = '✕ Fermer les statistiques';
+    if (!dashLoaded) { loadDashboard(); dashLoaded = true; }
+  }
+}
+
+async function loadDashboard() {
+  const slug = window._slug;
+  if (!slug) return;
+
+  try {
+    // Métriques depuis la carte
+    const carteDoc = await db.collection('cartes').doc(slug).get();
+    const carteData = carteDoc.data();
+    document.getElementById('d-vues').textContent = carteData.vues || 0;
+    document.getElementById('d-wa').textContent = carteData.clics_whatsapp || 0;
+
+    // Récupérer les visites
+    const visitesSnap = await db.collection('visites')
+      .where('slug', '==', slug)
+      .orderBy('timestamp', 'desc')
+      .limit(100)
+      .get();
+
+    const visites = visitesSnap.docs.map(d => d.data());
+
+    if (visites.length === 0) {
+      ['d-devices','d-sources','d-countries','d-recent'].forEach(id => {
+        document.getElementById(id).innerHTML = '<div class="empty-state">Aucune visite enregistrée encore</div>';
+      });
+      return;
+    }
+
+    // ── Appareils ────────────────────────────────────────
+    renderBars('d-devices', countBy(visites, 'device'));
+
+    // ── Sources ──────────────────────────────────────────
+    renderBars('d-sources', countBy(visites, 'source'));
+
+    // ── Pays ─────────────────────────────────────────────
+    renderBars('d-countries', countBy(visites, 'country'));
+
+    // ── Visites récentes ──────────────────────────────────
+    const recentEl = document.getElementById('d-recent');
+    const recent = visites.slice(0, 8);
+    recentEl.innerHTML = recent.map(v => {
+      const flag = v.country_code ? getFlagEmoji(v.country_code) : '🌐';
+      const time = v.timestamp ? formatTime(v.timestamp.toDate()) : 'récemment';
+      const deviceIcon = v.device === 'Mobile' ? '📱' : '💻';
+      return `<div class="visite-item">
+        <div class="visite-left">
+          <span class="visite-flag">${flag}</span>
+          <div>
+            <div class="visite-info">${v.country || 'Inconnu'} ${v.city ? '· '+v.city : ''}</div>
+            <div class="visite-sub">${deviceIcon} ${v.device || '—'} · ${v.source || '—'}</div>
+          </div>
+        </div>
+        <div class="visite-time">${time}</div>
+      </div>`;
+    }).join('');
+
+  } catch(err) {
+    console.error('Dashboard error:', err);
+    document.getElementById('d-recent').innerHTML = '<div class="empty-state">Erreur de chargement</div>';
+  }
+}
+
+function countBy(arr, key) {
+  const counts = {};
+  arr.forEach(item => {
+    const val = item[key] || 'Inconnu';
+    counts[val] = (counts[val] || 0) + 1;
+  });
+  return Object.entries(counts).sort((a,b) => b[1]-a[1]);
+}
+
+function renderBars(containerId, entries) {
+  if (!entries.length) {
+    document.getElementById(containerId).innerHTML = '<div class="empty-state">Aucune donnée</div>';
+    return;
+  }
+  const max = entries[0][1];
+  document.getElementById(containerId).innerHTML = entries.slice(0,6).map(([label, count]) => `
+    <div class="bar-item">
+      <span class="bar-label">${label}</span>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${Math.round(count/max*100)}%"></div>
+      </div>
+      <span class="bar-count">${count}</span>
+    </div>
+  `).join('');
+}
+
+function getFlagEmoji(code) {
+  if (!code || code.length !== 2) return '🌐';
+  return code.toUpperCase().split('').map(c =>
+    String.fromCodePoint(c.charCodeAt(0) + 127397)
+  ).join('');
+}
+
+function formatTime(date) {
+  const now = new Date();
+  const diff = Math.floor((now - date) / 1000);
+  if (diff < 60) return "À l'instant";
+  if (diff < 3600) return `Il y a ${Math.floor(diff/60)} min`;
+  if (diff < 86400) return `Il y a ${Math.floor(diff/3600)}h`;
+  return date.toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
+}
+// ── END DASHBOARD ────────────────────────────────────────────
 
 loadCarte();
 </script>
