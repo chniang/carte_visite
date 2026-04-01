@@ -1943,13 +1943,12 @@
 
   // ── LIENS DYNAMIQUES ────────────────────────────────────────
   const PLATEFORMES = [
+    { val: 'linkedin',   label: '💼 LinkedIn',   ph: 'https://linkedin.com/in/...' },
     { val: 'facebook',   label: '📘 Facebook',   ph: 'https://facebook.com/...' },
+    { val: 'github',     label: '🐙 GitHub',     ph: 'https://github.com/...' },
     { val: 'instagram',  label: '📸 Instagram',  ph: 'https://instagram.com/...' },
     { val: 'tiktok',     label: '🎵 TikTok',     ph: 'https://tiktok.com/@...' },
     { val: 'youtube',    label: '▶️ YouTube',    ph: 'https://youtube.com/@...' },
-    { val: 'whatsapp',   label: '💬 WhatsApp',   ph: 'https://wa.me/221...' },
-    { val: 'linkedin',   label: '💼 LinkedIn',   ph: 'https://linkedin.com/in/...' },
-    { val: 'github',     label: '🐙 GitHub',     ph: 'https://github.com/...' },
     { val: 'portfolio',  label: '🌐 Site Web',   ph: 'https://monsite.com' },
     { val: 'twitter',    label: '🐦 Twitter/X',  ph: 'https://x.com/...' },
     { val: 'snapchat',   label: '👻 Snapchat',   ph: 'https://snapchat.com/add/...' },
@@ -2003,9 +2002,10 @@
     return liens;
   }
 
-  // Ajouter les liens par défaut au chargement
+  // Liens visibles par défaut
+  addLien('linkedin', '');
   addLien('facebook', '');
-  addLien('instagram', '');
+  addLien('github', '');
   // ── END LIENS DYNAMIQUES ─────────────────────────────────────
 
   // Init preview

@@ -410,6 +410,12 @@
       <div class="socials" id="socials-list"></div>
     </div>
 
+    <div class="carte-section" id="section-liens" style="display:none">
+      <hr class="section-sep" />
+      <span class="sec-label">Mes réseaux & liens</span>
+      <div class="socials" id="liens-list"></div>
+    </div>
+
   </div>
 
   <div class="carte-footer">
@@ -635,16 +641,42 @@ async function loadCarte() {
         services.map(s=>`<span class="service-tag">${s}</span>`).join('');
     }
 
-    // Réseaux
+
+  const PLATEFORME_ICONS = {
+    linkedin:  '💼', facebook: '📘', github: '🐙',
+    instagram: '📸', tiktok:   '🎵', youtube: '▶️',
+    portfolio: '🌐', twitter:  '🐦', snapchat: '👻',
+    autre:     '🔗'
+  };
+  const PLATEFORME_LABELS = {
+    linkedin:  'LinkedIn', facebook: 'Facebook', github: 'GitHub',
+    instagram: 'Instagram', tiktok: 'TikTok', youtube: 'YouTube',
+    portfolio: 'Site Web', twitter: 'Twitter/X', snapchat: 'Snapchat',
+    autre: 'Lien'
+  };
+
+    // Anciens champs réseaux (compatibilité)
     const socials = [];
     if (d.github)    socials.push({ href:d.github,    icon:'🐙', label:'GitHub' });
     if (d.linkedin)  socials.push({ href:d.linkedin,  icon:'💼', label:'LinkedIn' });
-    if (d.portfolio) socials.push({ href:d.portfolio, icon:'🌐', label:'Portfolio' });
+    if (d.portfolio) socials.push({ href:d.portfolio, icon:'🌐', label:'Site Web' });
     if (socials.length > 0) {
       document.getElementById('section-socials').style.display = 'block';
       document.getElementById('socials-list').innerHTML = socials.map(s=>
         `<a class="social-btn" href="${s.href}" target="_blank"><span>${s.icon}</span>${s.label}</a>`
       ).join('');
+    }
+
+    // Nouveaux liens dynamiques
+    const liens = d.liens || [];
+    const liensValides = liens.filter(l => l.url && l.url.trim() !== '');
+    if (liensValides.length > 0) {
+      document.getElementById('section-liens').style.display = 'block';
+      document.getElementById('liens-list').innerHTML = liensValides.map(l => {
+        const icon = PLATEFORME_ICONS[l.type] || '🔗';
+        const label = PLATEFORME_LABELS[l.type] || l.type;
+        return `<a class="social-btn" href="${l.url}" target="_blank"><span>${icon}</span>${label}</a>`;
+      }).join('');
     }
 
     // WhatsApp CTA + tracker clics
