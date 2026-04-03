@@ -275,6 +275,24 @@
       color: var(--text); margin: 0;
     }
     .dash-header .dash-icon { font-size: 1.3rem; }
+    .btn-upgrade {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 1.25rem;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #a78bfa, #818cf8);
+      color: white;
+      font-family: var(--jakarta);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-upgrade:hover { opacity: 0.9; transform: translateY(-1px); }
     .dash-body {
       background: var(--surface);
       border: 1px solid rgba(167,139,250,0.2); border-top: none;
@@ -442,6 +460,12 @@
     <h2>Mes statistiques</h2>
   </div>
   <div class="dash-body">
+    <!-- Bouton upgrade Pro -->
+    <div id="upgrade-banner" style="display:none">
+      <a id="btn-upgrade" href="paiement.html" class="btn-upgrade">
+        ⭐ Passer au plan Pro — 5 000 FCFA/mois
+      </a>
+    </div>
 
     <!-- Métriques principales -->
     <div class="metrics-grid">
@@ -581,6 +605,7 @@ async function loadCarte() {
     if (!doc.exists) { showError(`La carte "${slug}" n'existe pas.`); return; }
 
     const d = doc.data();
+      setupUpgradeBanner(d);
 
     // Incrémenter vues + enregistrer la visite
     db.collection('cartes').doc(slug).update({
@@ -725,6 +750,25 @@ function downloadQR() {
 
 // ── DASHBOARD ───────────────────────────────────────────────
 let dashLoaded = false;
+
+function setupUpgradeBanner(data) {
+  // Afficher le bouton upgrade si pas de plan pro/lifetime
+  const plan = data && data.plan;
+  const expire = data && data.plan_expire;
+  const isActive = (plan === 'pro' || plan === 'lifetime') &&
+    (!expire || new Date(expire.seconds ? expire.seconds * 1000 : expire) > new Date());
+
+  const banner = document.getElementById('upgrade-banner');
+  const btn = document.getElementById('btn-upgrade');
+  if (banner) banner.style.display = isActive ? 'none' : 'block';
+
+  // Ajouter slug+owner dans le lien
+  const slug = new URLSearchParams(window.location.search).get('slug');
+  const owner = new URLSearchParams(window.location.search).get('owner');
+  if (btn && slug) {
+    btn.href = 'paiement.html?slug=' + slug + (owner ? '&owner=' + owner : '');
+  }
+}
 
 function toggleDashboard() {
   const section = document.getElementById('dashboard-section');
