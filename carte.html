@@ -275,6 +275,35 @@
       color: var(--text); margin: 0;
     }
     .dash-header .dash-icon { font-size: 1.3rem; }
+    .theme-picker {
+      margin-bottom: 1.25rem;
+      padding: 1rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .theme-picker-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+    .color-options {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .color-swatch {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch.active { border-color: white; transform: scale(1.15); }
     .btn-upgrade {
       display: block;
       width: 100%;
@@ -460,6 +489,22 @@
     <h2>Mes statistiques</h2>
   </div>
   <div class="dash-body">
+    <!-- Personnalisation thème (Pro) -->
+    <div id="theme-picker-section" style="display:none">
+      <div class="theme-picker">
+        <div class="theme-picker-title">🎨 Couleur de ta carte</div>
+        <div class="color-options">
+          <div class="color-swatch" style="background:#a78bfa" data-color="#a78bfa" onclick="applyTheme(this)" title="Violet"></div>
+          <div class="color-swatch" style="background:#818cf8" data-color="#818cf8" onclick="applyTheme(this)" title="Indigo"></div>
+          <div class="color-swatch" style="background:#34d399" data-color="#34d399" onclick="applyTheme(this)" title="Vert"></div>
+          <div class="color-swatch" style="background:#f59e0b" data-color="#f59e0b" onclick="applyTheme(this)" title="Orange"></div>
+          <div class="color-swatch" style="background:#ef4444" data-color="#ef4444" onclick="applyTheme(this)" title="Rouge"></div>
+          <div class="color-swatch" style="background:#06b6d4" data-color="#06b6d4" onclick="applyTheme(this)" title="Cyan"></div>
+          <div class="color-swatch" style="background:#ec4899" data-color="#ec4899" onclick="applyTheme(this)" title="Rose"></div>
+          <div class="color-swatch" style="background:#ffffff" data-color="#ffffff" onclick="applyTheme(this)" title="Blanc"></div>
+        </div>
+      </div>
+    </div>
     <!-- Bouton upgrade Pro -->
     <div id="upgrade-banner" style="display:none">
       <a id="btn-upgrade" href="paiement.html" class="btn-upgrade">
@@ -607,6 +652,8 @@ async function loadCarte() {
     const d = doc.data();
       window._carteData = d;
       setupUpgradeBanner(d);
+      // Appliquer thème pour tous les visiteurs
+      if (d.theme_color) loadTheme(d.theme_color);
 
     // Incrémenter vues + enregistrer la visite
     db.collection('cartes').doc(slug).update({
@@ -752,6 +799,34 @@ function downloadQR() {
 // ── DASHBOARD ───────────────────────────────────────────────
 let dashLoaded = false;
 
+function applyTheme(swatchEl) {
+  const color = swatchEl.dataset.color;
+  document.documentElement.style.setProperty('--accent', color);
+  document.documentElement.style.setProperty('--accent2', color);
+  // Marquer actif
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+  swatchEl.classList.add('active');
+  // Sauvegarder dans Firestore
+  const slug = new URLSearchParams(window.location.search).get('slug');
+  if (slug) {
+    db.collection('cartes').doc(slug).update({ theme_color: color })
+      .then(() => console.log('Thème sauvegardé'))
+      .catch(e => console.error('Erreur save thème', e));
+  }
+}
+
+function loadTheme(color) {
+  if (!color) return;
+  document.documentElement.style.setProperty('--accent', color);
+  document.documentElement.style.setProperty('--accent2', color);
+  // Marquer le swatch actif
+  const swatch = document.querySelector('.color-swatch[data-color="' + color + '"]');
+  if (swatch) {
+    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+    swatch.classList.add('active');
+  }
+}
+
 function setupUpgradeBanner(data) {
   // Afficher le bouton upgrade si pas de plan pro/lifetime
   const plan = data && data.plan;
@@ -762,6 +837,11 @@ function setupUpgradeBanner(data) {
   const banner = document.getElementById('upgrade-banner');
   const btn = document.getElementById('btn-upgrade');
   if (banner) banner.style.display = isActive ? 'none' : 'block';
+  // Afficher sélecteur thème si Pro
+  const themePicker = document.getElementById('theme-picker-section');
+  if (themePicker) themePicker.style.display = isActive ? 'block' : 'none';
+  // Charger la couleur sauvegardée
+  if (data && data.theme_color) loadTheme(data.theme_color);
 
   // Ajouter slug+owner dans le lien
   const slug = new URLSearchParams(window.location.search).get('slug');
