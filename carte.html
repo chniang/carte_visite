@@ -605,6 +605,7 @@ async function loadCarte() {
     if (!doc.exists) { showError(`La carte "${slug}" n'existe pas.`); return; }
 
     const d = doc.data();
+      window._carteData = d;
       setupUpgradeBanner(d);
 
     // Incrémenter vues + enregistrer la visite
@@ -771,6 +772,18 @@ function setupUpgradeBanner(data) {
 }
 
 function toggleDashboard() {
+  // Verifier plan Pro
+  const d = window._carteData;
+  const plan = d && d.plan;
+  const expire = d && d.plan_expire;
+  const isActive = (plan === 'pro' || plan === 'lifetime') &&
+    (!expire || new Date(expire.seconds ? expire.seconds*1000 : expire) > new Date());
+  if (!isActive) {
+    const slug = new URLSearchParams(window.location.search).get('slug');
+    const owner = new URLSearchParams(window.location.search).get('owner');
+    window.location.href = 'paiement.html?slug=' + slug + (owner ? '&owner=' + owner : '');
+    return;
+  }
   const section = document.getElementById('dashboard-section');
   const btn = document.getElementById('btn-dashboard');
   if (section.style.display === 'block') {
