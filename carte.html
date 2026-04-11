@@ -912,27 +912,27 @@ function loadTheme(color) {
 
 // Descriptions par défaut des services
 const DEFAULT_DESCRIPTIONS = {
-  'Machine Learning': 'Je construis des modèles prédictifs et des algorithmes d'apprentissage automatique adaptés à vos données et objectifs métier.',
-  'NLP / Chatbot': 'Je développe des chatbots intelligents et des solutions de traitement du langage naturel pour automatiser vos interactions clients.',
-  'Data Visualisation': 'Je crée des visualisations de données claires et impactantes pour vous aider à comprendre et communiquer vos insights.',
-  'Dashboard': 'Je conçois des tableaux de bord interactifs et personnalisés pour suivre vos KPIs en temps réel.',
-  'Automatisation': 'J'automatise vos processus répétitifs pour vous faire gagner du temps et réduire les erreurs.',
-  'Web Scraping': 'Je collecte et structure des données web de manière automatisée pour alimenter vos analyses.',
-  'Site Web': 'Je conçois et développe des sites web modernes, rapides et adaptés à vos besoins.',
-  'Portfolio': 'Je crée des portfolios professionnels qui mettent en valeur vos réalisations.',
-  'Carte de visite': 'Je crée des cartes de visite numériques professionnelles et modernes.',
-  'Scripts Python': 'Je développe des scripts Python sur mesure pour automatiser et optimiser vos tâches.',
-  'Application Mobile': 'Je développe des applications mobiles performantes pour iOS et Android.',
-  'Coiffure femme': 'Je propose des services de coiffure femme adaptés à tous les types de cheveux.',
-  'Tresses africaines': 'Je réalise toutes sortes de tresses africaines traditionnelles et modernes.',
-  'Maçonnerie': 'Je réalise vos travaux de maçonnerie avec soin et professionnalisme.',
-  'Plomberie': 'J'interviens pour tous vos travaux de plomberie, installation et réparation.',
+  "Machine Learning": "Je construis des modeles predictifs et des algorithmes adaptes a vos donnees et objectifs metier.",
+  "NLP / Chatbot": "Je developpe des chatbots intelligents et des solutions de traitement du langage naturel pour automatiser vos interactions clients.",
+  "Data Visualisation": "Je cree des visualisations de donnees claires et impactantes pour vous aider a comprendre vos insights.",
+  "Dashboard": "Je concois des tableaux de bord interactifs et personnalises pour suivre vos KPIs en temps reel.",
+  "Automatisation": "J automatise vos processus repetitifs pour vous faire gagner du temps et reduire les erreurs.",
+  "Web Scraping": "Je collecte et structure des donnees web de maniere automatisee pour alimenter vos analyses.",
+  "Site Web": "Je concois et developpe des sites web modernes, rapides et adaptes a vos besoins.",
+  "Portfolio": "Je cree des portfolios professionnels qui mettent en valeur vos realisations.",
+  "Carte de visite": "Je cree des cartes de visite numeriques professionnelles et modernes.",
+  "Scripts Python": "Je developpe des scripts Python sur mesure pour automatiser et optimiser vos taches.",
+  "Application Mobile": "Je developpe des applications mobiles performantes pour iOS et Android.",
+  "Coiffure femme": "Je propose des services de coiffure femme adaptes a tous les types de cheveux.",
+  "Tresses africaines": "Je realise toutes sortes de tresses africaines traditionnelles et modernes.",
+  "Maconnerie": "Je realise vos travaux de maconnerie avec soin et professionnalisme.",
+  "Plomberie": "J interviens pour tous vos travaux de plomberie, installation et reparation.",
 };
 
 function getServiceDescription(serviceName, customDescs) {
   if (customDescs && customDescs[serviceName]) return customDescs[serviceName];
   if (DEFAULT_DESCRIPTIONS[serviceName]) return DEFAULT_DESCRIPTIONS[serviceName];
-  return 'Je propose des services de ' + serviceName + ' de qualité. Contactez-moi pour discuter de votre projet et obtenir un devis personnalisé.';
+  return "Je propose des services de " + serviceName + ". Contactez-moi pour discuter de votre projet.";
 }
 
 function openServiceModal(serviceName) {
@@ -946,7 +946,7 @@ function openServiceModal(serviceName) {
 
   const desc = getServiceDescription(serviceName, d.services_descriptions);
   const tel = d.tel ? d.tel.replace(/[^0-9+]/g, '') : '';
-  const msg = encodeURIComponent('Bonjour, je suis intéressé par votre service : ' + serviceName + '. Pouvez-vous me donner plus d'informations ?');
+  const msg = encodeURIComponent("Bonjour, je suis interesse par votre service : " + serviceName + ". Pouvez-vous me donner plus d informations ?");
   const waUrl = 'https://wa.me/' + tel + '?text=' + msg;
 
   document.getElementById('modal-service-name').textContent = serviceName;
