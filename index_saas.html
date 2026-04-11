@@ -42,6 +42,7 @@
       font-size: 16px;
       line-height: 1.6;
       overflow-x: hidden;
+      max-width: 100vw;
     }
 
     /* ─── NOISE OVERLAY ─── */
@@ -302,11 +303,20 @@
       .creator-grid { grid-template-columns: 1fr; }
       .preview-sticky { position: static !important; }
     }
+    @media (max-width: 600px) {
+      .creator-grid { padding: 0 0.5rem; }
+      .section-inner { padding: 0 0.5rem; }
+    }
 
     /* Form */
     .form-card {
       background: var(--surface2); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 2.5rem;
+      max-width: 100%;
+      overflow: hidden;
+    }
+    @media (max-width: 600px) {
+      .form-card { padding: 1.2rem; }
     }
     .form-title {
       font-family: var(--syne); font-size: 1.5rem; font-weight: 700;
