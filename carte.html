@@ -189,6 +189,79 @@
 
     /* Services */
     .services-chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+    /* Modal service */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: #13131f;
+      border: 1px solid rgba(167,139,250,0.3);
+      border-radius: 20px;
+      padding: 32px 28px;
+      max-width: 400px;
+      width: 100%;
+      animation: fadeUp .3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .modal-service-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    .modal-service-desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+    .modal-btn-wa {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      background: #25d366;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: var(--jakarta);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .modal-btn-wa:hover { opacity: 0.9; }
+    .modal-close {
+      display: block;
+      margin-top: 12px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: var(--jakarta);
+      width: 100%;
+    }
+    .modal-close:hover { color: var(--text); }
+    .service-tag {
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .service-tag:hover {
+      background: rgba(139,92,246,0.2);
+      border-color: rgba(139,92,246,0.5);
+    }
     .service-tag {
       padding: .35rem .85rem; border-radius: 999px;
       background: rgba(139,92,246,0.1);
@@ -489,6 +562,16 @@
     <h2>Mes statistiques</h2>
   </div>
   <div class="dash-body">
+    <!-- Personnalisation descriptions services (Pro) -->
+    <div id="service-desc-section" style="display:none">
+      <div class="theme-picker" style="margin-bottom:1.25rem">
+        <div class="theme-picker-title">📝 Descriptions de vos services</div>
+        <div id="service-desc-list" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
+        <button onclick="saveServiceDescs()" style="margin-top:12px;width:100%;padding:10px;background:linear-gradient(135deg,#a78bfa,#818cf8);color:white;border:none;border-radius:10px;font-family:var(--jakarta);font-weight:700;font-size:14px;cursor:pointer">
+          💾 Sauvegarder les descriptions
+        </button>
+      </div>
+    </div>
     <!-- Personnalisation thème (Pro) -->
     <div id="theme-picker-section" style="display:none">
       <div class="theme-picker">
@@ -711,7 +794,7 @@ async function loadCarte() {
     if (services.length > 0) {
       document.getElementById('section-services').style.display = 'block';
       document.getElementById('services-list').innerHTML =
-        services.map(s=>`<span class="service-tag">${s}</span>`).join('');
+        services.map(s=>`<span class="service-tag" onclick="openServiceModal('${s}')">${s}</span>`).join('');
     }
 
 
@@ -827,6 +910,91 @@ function loadTheme(color) {
   }
 }
 
+// Descriptions par défaut des services
+const DEFAULT_DESCRIPTIONS = {
+  'Machine Learning': 'Je construis des modèles prédictifs et des algorithmes d'apprentissage automatique adaptés à vos données et objectifs métier.',
+  'NLP / Chatbot': 'Je développe des chatbots intelligents et des solutions de traitement du langage naturel pour automatiser vos interactions clients.',
+  'Data Visualisation': 'Je crée des visualisations de données claires et impactantes pour vous aider à comprendre et communiquer vos insights.',
+  'Dashboard': 'Je conçois des tableaux de bord interactifs et personnalisés pour suivre vos KPIs en temps réel.',
+  'Automatisation': 'J'automatise vos processus répétitifs pour vous faire gagner du temps et réduire les erreurs.',
+  'Web Scraping': 'Je collecte et structure des données web de manière automatisée pour alimenter vos analyses.',
+  'Site Web': 'Je conçois et développe des sites web modernes, rapides et adaptés à vos besoins.',
+  'Portfolio': 'Je crée des portfolios professionnels qui mettent en valeur vos réalisations.',
+  'Carte de visite': 'Je crée des cartes de visite numériques professionnelles et modernes.',
+  'Scripts Python': 'Je développe des scripts Python sur mesure pour automatiser et optimiser vos tâches.',
+  'Application Mobile': 'Je développe des applications mobiles performantes pour iOS et Android.',
+  'Coiffure femme': 'Je propose des services de coiffure femme adaptés à tous les types de cheveux.',
+  'Tresses africaines': 'Je réalise toutes sortes de tresses africaines traditionnelles et modernes.',
+  'Maçonnerie': 'Je réalise vos travaux de maçonnerie avec soin et professionnalisme.',
+  'Plomberie': 'J'interviens pour tous vos travaux de plomberie, installation et réparation.',
+};
+
+function getServiceDescription(serviceName, customDescs) {
+  if (customDescs && customDescs[serviceName]) return customDescs[serviceName];
+  if (DEFAULT_DESCRIPTIONS[serviceName]) return DEFAULT_DESCRIPTIONS[serviceName];
+  return 'Je propose des services de ' + serviceName + ' de qualité. Contactez-moi pour discuter de votre projet et obtenir un devis personnalisé.';
+}
+
+function openServiceModal(serviceName) {
+  const d = window._carteData;
+  const plan = d && d.plan;
+  const expire = d && d.plan_expire;
+  const isActive = (plan === 'pro' || plan === 'lifetime') &&
+    (!expire || new Date(expire.seconds ? expire.seconds*1000 : expire) > new Date());
+
+  if (!isActive) return; // Pas de modal si pas Pro
+
+  const desc = getServiceDescription(serviceName, d.services_descriptions);
+  const tel = d.tel ? d.tel.replace(/[^0-9+]/g, '') : '';
+  const msg = encodeURIComponent('Bonjour, je suis intéressé par votre service : ' + serviceName + '. Pouvez-vous me donner plus d'informations ?');
+  const waUrl = 'https://wa.me/' + tel + '?text=' + msg;
+
+  document.getElementById('modal-service-name').textContent = serviceName;
+  document.getElementById('modal-service-desc').textContent = desc;
+  document.getElementById('modal-wa-btn').href = waUrl;
+  document.getElementById('service-modal').classList.add('open');
+}
+
+function closeServiceModal() {
+  document.getElementById('service-modal').classList.remove('open');
+}
+
+// Fermer modal en cliquant dehors
+document.addEventListener('click', function(e) {
+  const modal = document.getElementById('service-modal');
+  if (e.target === modal) closeServiceModal();
+});
+
+function renderServiceDescEditor(services, customDescs) {
+  const container = document.getElementById('service-desc-list');
+  if (!container) return;
+  container.innerHTML = services.map(s => `
+    <div style="margin-bottom:6px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:3px">${s}</div>
+      <textarea id="desc-${s.replace(/[^a-zA-Z0-9]/g,'_')}"
+        style="width:100%;padding:8px;background:#1a1a35;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--jakarta);font-size:12px;resize:vertical;min-height:60px"
+        placeholder="Description par défaut utilisée si vide..."
+      >${customDescs && customDescs[s] ? customDescs[s] : ''}</textarea>
+    </div>
+  `).join('');
+}
+
+function saveServiceDescs() {
+  const d = window._carteData;
+  if (!d) return;
+  const services = d.services || [];
+  const descs = {};
+  services.forEach(s => {
+    const key = 'desc-' + s.replace(/[^a-zA-Z0-9]/g,'_');
+    const el = document.getElementById(key);
+    if (el && el.value.trim()) descs[s] = el.value.trim();
+  });
+  const slug = new URLSearchParams(window.location.search).get('slug');
+  db.collection('cartes').doc(slug).update({ services_descriptions: descs })
+    .then(() => alert('✅ Descriptions sauvegardées !'))
+    .catch(e => alert('❌ Erreur : ' + e.message));
+}
+
 function setupUpgradeBanner(data) {
   // Afficher le bouton upgrade si pas de plan pro/lifetime
   const plan = data && data.plan;
@@ -840,6 +1008,12 @@ function setupUpgradeBanner(data) {
   // Afficher sélecteur thème si Pro
   const themePicker = document.getElementById('theme-picker-section');
   if (themePicker) themePicker.style.display = isActive ? 'block' : 'none';
+  // Afficher éditeur descriptions si Pro
+  const descSection = document.getElementById('service-desc-section');
+  if (descSection) descSection.style.display = isActive ? 'block' : 'none';
+  if (isActive && data.services) {
+    renderServiceDescEditor(data.services, data.services_descriptions);
+  }
   // Charger la couleur sauvegardée
   if (data && data.theme_color) loadTheme(data.theme_color);
 
@@ -982,5 +1156,17 @@ function formatTime(date) {
 
 loadCarte();
 </script>
+
+<!-- Modal Service -->
+<div class="modal-overlay" id="service-modal">
+  <div class="modal-box">
+    <div class="modal-service-name" id="modal-service-name">Service</div>
+    <div class="modal-service-desc" id="modal-service-desc"></div>
+    <a href="#" class="modal-btn-wa" id="modal-wa-btn" target="_blank">
+      💬 Commander ce service sur WhatsApp
+    </a>
+    <button class="modal-close" onclick="closeServiceModal()">✕ Fermer</button>
+  </div>
+</div>
 </body>
 </html>
