@@ -947,7 +947,8 @@ function openServiceModal(serviceName) {
   const isActive = (plan === 'pro' || plan === 'lifetime') &&
     (!expire || new Date(expire.seconds ? expire.seconds*1000 : expire) > new Date());
 
-  if (!isActive) return; // Pas de modal si pas Pro
+  const owner = new URLSearchParams(window.location.search).get('owner');
+  if (!isActive || !owner) return; // Pas de modal si pas Pro ou pas owner
 
   const desc = getServiceDescription(serviceName, d.services_descriptions);
   const tel = d.tel ? d.tel.replace(/[^0-9+]/g, '') : '';
