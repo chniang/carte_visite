@@ -948,7 +948,8 @@ function openServiceModal(serviceName) {
     (!expire || new Date(expire.seconds ? expire.seconds*1000 : expire) > new Date());
 
   const owner = new URLSearchParams(window.location.search).get('owner');
-  if (!isActive || !owner) return; // Pas de modal si pas Pro ou pas owner
+  const validOwner = owner && d.owner_token && owner === d.owner_token;
+  if (!isActive || !validOwner) return; // Modal uniquement si Pro + bon token
 
   const desc = getServiceDescription(serviceName, d.services_descriptions);
   const tel = d.tel ? d.tel.replace(/[^0-9+]/g, '') : '';
