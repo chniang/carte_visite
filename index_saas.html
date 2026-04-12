@@ -916,30 +916,7 @@
     .footer-brand span { color: var(--accent); }
     footer p { font-size: 0.82rem; color: var(--muted); }
 
-    /* ─── FIREBASE CONFIG BANNER ─── */
-    #firebase-banner {
-      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200;
-      background: #1e293b; border: 1px solid rgba(239,68,68,0.4);
-      border-radius: 10px; padding: 1rem 1.2rem; max-width: 340px;
-      box-shadow: var(--shadow);
-    }
-    #firebase-banner h4 {
-      font-family: var(--syne); font-size: 0.9rem; font-weight: 700;
-      color: #fca5a5; margin-bottom: 0.4rem;
-    }
-    #firebase-banner p { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
-    #firebase-banner code {
-      display: block; margin-top: 0.5rem;
-      background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 5px;
-      font-size: 0.75rem; color: #93c5fd; white-space: pre-wrap;
-    }
-    #firebase-banner button {
-      margin-top: 0.75rem; background: transparent;
-      border: 1px solid var(--border); color: var(--muted);
-      padding: 0.3rem 0.8rem; border-radius: 5px;
-      cursor: pointer; font-size: 0.78rem; transition: all .2s;
-    }
-    #firebase-banner button:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    
   </style>
 </head>
 <body>
@@ -1345,18 +1322,7 @@
   <p style="font-size:.78rem;color:var(--muted)">© 2025 CarteViz · Tous droits réservés</p>
 </footer>
 
-<!-- ─── FIREBASE CONFIG BANNER (à supprimer après config) ─── -->
-<div id="firebase-banner">
-  <h4>⚠️ Firebase non configuré</h4>
-  <p>Remplace la config dans le script par tes clés Firebase :</p>
-  <code>const firebaseConfig = {
-  apiKey: "TON_API_KEY",
-  authDomain: "...",
-  projectId: "...",
-  ...
-};</code>
-  <button onclick="document.getElementById('firebase-banner').remove()">Compris ✕</button>
-</div>
+
 
 <!-- ─── SCRIPTS ─── -->
 <script>
@@ -1383,7 +1349,6 @@
     db = firebase.firestore();
     window.storage = firebase.storage();
     firebaseReady = true;
-    document.getElementById('firebase-banner').remove();
     console.log('✅ Firebase connecté');
   } catch (err) {
     console.warn('⚠️ Firebase non configuré — mode démo activé', err);
