@@ -893,6 +893,10 @@
 
     .lien-row {
       display: flex; gap: .5rem; align-items: center;
+      width: 100%; box-sizing: border-box;
+    }
+    @media (max-width: 600px) {
+      .lien-row { flex-wrap: nowrap; }
     }
     .lien-select {
       background: var(--bg); border: 1px solid var(--border);
@@ -900,6 +904,9 @@
       font-family: var(--dm); font-size: .85rem;
       padding: .6rem .75rem; flex-shrink: 0; width: 140px;
       outline: none; transition: border-color .2s;
+    }
+    @media (max-width: 600px) {
+      .lien-select { width: 110px; font-size: .78rem; padding: .5rem .4rem; }
     }
     .lien-select:focus { border-color: rgba(167,139,250,0.5); }
     .lien-input {
@@ -911,6 +918,12 @@
     }
     .lien-input:focus { border-color: rgba(167,139,250,0.5); box-shadow: 0 0 0 3px rgba(167,139,250,0.1); }
     .lien-input::placeholder { color: var(--muted); opacity: .6; }
+    input[id^='lien-url-'] {
+      flex: 1; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-family: var(--dm); font-size: .85rem;
+      padding: .6rem .75rem; outline: none; min-width: 0;
+    }
     .btn-remove-lien {
       background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);
       color: #f87171; border-radius: 8px; padding: .6rem .75rem;
