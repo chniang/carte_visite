@@ -57,36 +57,6 @@
     nav {
       position: sticky; top: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 clamp(1.5rem, 5vw, 4rem);
-      height: 68px;
-      background: rgba(8,11,16,0.85);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-logo {
-      font-family: var(--syne); font-size: 1.35rem; font-weight: 700;
-      color: var(--text); text-decoration: none; letter-spacing: -0.03em;
-    }
-    .nav-logo span { color: var(--accent); }
-    .nav-links { display: flex; gap: 2rem; align-items: center; }
-    .nav-links a {
-      color: var(--muted); text-decoration: none; font-size: 0.9rem;
-      font-weight: 500; transition: color .2s;
-    }
-    .nav-links a:hover { color: var(--text); }
-    .btn-nav {
-      background: var(--accent); color: #000;
-      padding: 0.45rem 1.2rem; border-radius: 8px;
-      font-weight: 700; font-size: 0.85rem;
-      text-decoration: none; transition: opacity .2s;
-    }
-    .btn-nav:hover { opacity: .88; color: #000; }
-
-
-    /* ─── NAV ─── */
-    nav {
-      position: sticky; top: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
       padding: 0 clamp(1.2rem, 4vw, 3rem);
       height: 64px;
       background: rgba(10,10,20,0.9);
@@ -1204,7 +1174,7 @@
             </div>
           </div>
 
-          <hr class="form-divider"<hr class="form-divider" />
+          <hr class="form-divider" />
 
           <!-- Liens dynamiques -->
           <div class="services-group">
@@ -1434,10 +1404,7 @@
   }
 
   /** Obtient les services cochés */
-  function getSelectedServices() {
-    return [...document.querySelectorAll('input[name="service"]:checked')]
-      .map(cb => cb.value);
-  }
+  
 
   /** Formate un numéro WhatsApp (retire espaces, +) */
   function formatWA(tel) {
