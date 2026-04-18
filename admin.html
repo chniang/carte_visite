@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CarteViz — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#07080d;
+      --surface:#0e1017;
+      --surface2:#141720;
+      --border:rgba(255,255,255,0.06);
+      --accent:#00ff88;
+      --accent2:#00d4ff;
+      --warn:#ff6b35;
+      --text:#e8eaf0;
+      --muted:#5a6070;
+      --mono:'Space Mono',monospace;
+      --sans:'DM Sans',sans-serif;
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+
+    /* GATE */
+    #gate{
+      position:fixed;inset:0;background:var(--bg);
+      display:flex;align-items:center;justify-content:center;
+      z-index:999;flex-direction:column;gap:1.5rem;
+    }
+    .gate-logo{font-family:var(--mono);font-size:1.1rem;color:var(--muted);letter-spacing:.2em}
+    .gate-logo span{color:var(--accent)}
+    .gate-title{font-family:var(--mono);font-size:1.8rem;font-weight:700;letter-spacing:-.02em}
+    .gate-sub{font-size:.9rem;color:var(--muted)}
+    .gate-input-wrap{display:flex;gap:.75rem;margin-top:.5rem}
+    .gate-input{
+      background:var(--surface2);border:1px solid var(--border);
+      border-radius:8px;color:var(--text);font-family:var(--mono);
+      font-size:.9rem;padding:.75rem 1.25rem;width:320px;outline:none;
+      transition:border-color .2s;letter-spacing:.05em;
+    }
+    .gate-input:focus{border-color:rgba(0,255,136,0.4);box-shadow:0 0 0 3px rgba(0,255,136,0.08)}
+    .gate-btn{
+      background:var(--accent);color:#000;font-family:var(--mono);
+      font-weight:700;font-size:.85rem;padding:.75rem 1.5rem;
+      border:none;border-radius:8px;cursor:pointer;transition:opacity .2s;
+      letter-spacing:.05em;
+    }
+    .gate-btn:hover{opacity:.85}
+    .gate-error{color:#ff4f4f;font-size:.82rem;font-family:var(--mono);display:none}
+
+    /* LAYOUT */
+    #app{display:none}
+    .topbar{
+      position:sticky;top:0;z-index:100;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 2rem;height:56px;
+      background:rgba(7,8,13,0.95);
+      backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+    }
+    .topbar-logo{font-family:var(--mono);font-size:.95rem;font-weight:700;letter-spacing:.1em}
+    .topbar-logo span{color:var(--accent)}
+    .topbar-right{display:flex;align-items:center;gap:1rem}
+    .topbar-badge{
+      font-family:var(--mono);font-size:.7rem;
+      background:rgba(0,255,136,0.1);color:var(--accent);
+      border:1px solid rgba(0,255,136,0.25);
+      padding:.25rem .75rem;border-radius:999px;letter-spacing:.08em;
+    }
+    .topbar-logout{
+      background:none;border:1px solid var(--border);color:var(--muted);
+      font-family:var(--mono);font-size:.72rem;padding:.3rem .75rem;
+      border-radius:6px;cursor:pointer;transition:all .2s;
+    }
+    .topbar-logout:hover{border-color:rgba(255,75,75,0.4);color:#ff4f4f}
+
+    .main{padding:2rem;max-width:1400px;margin:0 auto}
+
+    /* SECTION HEADER */
+    .sec-header{margin-bottom:1.5rem}
+    .sec-label{font-family:var(--mono);font-size:.7rem;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.4rem}
+    .sec-title{font-size:1.4rem;font-weight:700;letter-spacing:-.02em}
+
+    /* KPI GRID */
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2.5rem}
+    .kpi-card{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:12px;padding:1.5rem;position:relative;overflow:hidden;
+      transition:border-color .2s,transform .2s;cursor:default;
+    }
+    .kpi-card:hover{border-color:rgba(0,255,136,0.2);transform:translateY(-2px)}
+    .kpi-card::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,var(--accent),transparent);
+      opacity:0;transition:opacity .2s;
+    }
+    .kpi-card:hover::before{opacity:1}
+    .kpi-icon{font-size:1.5rem;margin-bottom:.75rem}
+    .kpi-val{font-family:var(--mono);font-size:2rem;font-weight:700;line-height:1;margin-bottom:.35rem}
+    .kpi-label{font-size:.8rem;color:var(--muted);font-weight:500}
+    .kpi-trend{font-family:var(--mono);font-size:.72rem;margin-top:.4rem}
+    .kpi-trend.up{color:var(--accent)}
+    .kpi-trend.neutral{color:var(--muted)}
+
+    /* GRID 2 COL */
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2.5rem}
+    @media(max-width:900px){.grid-2{grid-template-columns:1fr}}
+
+    /* CARD */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem}
+    .card-title{font-family:var(--mono);font-size:.78rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.25rem}
+
+    /* LISTE CARTES */
+    .cartes-table{width:100%;border-collapse:collapse}
+    .cartes-table th{
+      font-family:var(--mono);font-size:.68rem;color:var(--muted);
+      letter-spacing:.1em;text-align:left;padding:.6rem .75rem;
+      border-bottom:1px solid var(--border);text-transform:uppercase;
+    }
+    .cartes-table td{
+      padding:.65rem .75rem;font-size:.83rem;
+      border-bottom:1px solid rgba(255,255,255,0.03);
+    }
+    .cartes-table tr:hover td{background:rgba(255,255,255,0.02)}
+    .plan-badge{
+      font-family:var(--mono);font-size:.65rem;padding:.2rem .6rem;
+      border-radius:999px;font-weight:700;letter-spacing:.05em;
+    }
+    .plan-free{background:rgba(90,96,112,0.2);color:var(--muted);border:1px solid rgba(90,96,112,0.3)}
+    .plan-pro{background:rgba(0,255,136,0.1);color:var(--accent);border:1px solid rgba(0,255,136,0.25)}
+    .plan-lifetime{background:rgba(0,212,255,0.1);color:var(--accent2);border:1px solid rgba(0,212,255,0.25)}
+    .cartes-empty{text-align:center;color:var(--muted);font-size:.85rem;padding:2rem;font-family:var(--mono)}
+
+    /* REPARTITION */
+    .repartition-list{display:flex;flex-direction:column;gap:.75rem}
+    .rep-item{display:flex;align-items:center;gap:.75rem}
+    .rep-label{font-size:.85rem;min-width:80px}
+    .rep-bar-wrap{flex:1;background:rgba(255,255,255,0.05);border-radius:999px;height:6px;overflow:hidden}
+    .rep-bar{height:100%;border-radius:999px;transition:width 1s ease}
+    .rep-val{font-family:var(--mono);font-size:.78rem;color:var(--muted);min-width:30px;text-align:right}
+
+    /* AI CHAT */
+    .ai-section{margin-bottom:2.5rem}
+    .ai-card{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:12px;overflow:hidden;
+    }
+    .ai-header{
+      padding:1rem 1.5rem;border-bottom:1px solid var(--border);
+      display:flex;align-items:center;gap:.75rem;
+    }
+    .ai-dot{
+      width:8px;height:8px;border-radius:50%;background:var(--accent);
+      animation:pulse 2s infinite;
+    }
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+    .ai-title{font-family:var(--mono);font-size:.82rem;color:var(--text);letter-spacing:.05em}
+    .ai-subtitle{font-size:.75rem;color:var(--muted);margin-left:auto}
+    .ai-messages{
+      height:320px;overflow-y:auto;padding:1.25rem;
+      display:flex;flex-direction:column;gap:1rem;
+    }
+    .ai-messages::-webkit-scrollbar{width:4px}
+    .ai-messages::-webkit-scrollbar-track{background:transparent}
+    .ai-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+    .msg{display:flex;gap:.75rem;animation:msgIn .3s ease}
+    @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .msg-avatar{
+      width:28px;height:28px;border-radius:6px;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.8rem;font-weight:700;
+    }
+    .msg-avatar.ai{background:rgba(0,255,136,0.15);color:var(--accent);font-family:var(--mono)}
+    .msg-avatar.user{background:rgba(0,212,255,0.15);color:var(--accent2);font-family:var(--mono)}
+    .msg-content{flex:1}
+    .msg-role{font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.35rem}
+    .msg-text{font-size:.85rem;line-height:1.6;color:var(--text)}
+    .msg-text.loading{color:var(--muted);font-style:italic}
+    .ai-input-wrap{
+      padding:1rem 1.25rem;border-top:1px solid var(--border);
+      display:flex;gap:.75rem;align-items:center;
+    }
+    .ai-input{
+      flex:1;background:var(--surface2);border:1px solid var(--border);
+      border-radius:8px;color:var(--text);font-family:var(--sans);
+      font-size:.88rem;padding:.65rem 1rem;outline:none;
+      transition:border-color .2s;
+    }
+    .ai-input:focus{border-color:rgba(0,255,136,0.35)}
+    .ai-input::placeholder{color:var(--muted);opacity:.6}
+    .ai-send{
+      background:var(--accent);color:#000;border:none;
+      border-radius:8px;padding:.65rem 1.25rem;cursor:pointer;
+      font-family:var(--mono);font-size:.78rem;font-weight:700;
+      transition:opacity .2s;letter-spacing:.05em;
+    }
+    .ai-send:hover{opacity:.85}
+    .ai-send:disabled{opacity:.4;cursor:not-allowed}
+    .ai-quick{display:flex;gap:.5rem;flex-wrap:wrap;padding:.75rem 1.25rem;border-top:1px solid var(--border)}
+    .ai-quick-btn{
+      background:var(--surface2);border:1px solid var(--border);
+      color:var(--muted);font-family:var(--mono);font-size:.68rem;
+      padding:.3rem .75rem;border-radius:999px;cursor:pointer;
+      transition:all .2s;letter-spacing:.04em;
+    }
+    .ai-quick-btn:hover{border-color:rgba(0,255,136,0.3);color:var(--accent)}
+
+    /* SECTEURS TOP */
+    .secteurs-grid{display:flex;flex-wrap:wrap;gap:.5rem}
+    .secteur-tag{
+      font-size:.75rem;padding:.3rem .75rem;border-radius:999px;
+      background:var(--surface2);border:1px solid var(--border);
+      font-family:var(--mono);color:var(--muted);
+    }
+    .secteur-tag.top{background:rgba(0,255,136,0.08);border-color:rgba(0,255,136,0.2);color:var(--accent)}
+
+    /* REFRESH */
+    .btn-refresh{
+      background:none;border:1px solid var(--border);color:var(--muted);
+      font-family:var(--mono);font-size:.72rem;padding:.4rem .9rem;
+      border-radius:6px;cursor:pointer;transition:all .2s;letter-spacing:.06em;
+    }
+    .btn-refresh:hover{border-color:rgba(0,255,136,0.3);color:var(--accent)}
+    .spin{animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* REVENUS */
+    .revenus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
+    .rev-item{text-align:center;padding:1rem;background:var(--surface2);border-radius:10px;border:1px solid var(--border)}
+    .rev-val{font-family:var(--mono);font-size:1.1rem;font-weight:700;color:var(--accent)}
+    .rev-label{font-size:.75rem;color:var(--muted);margin-top:.3rem}
+
+    /* LOADING */
+    .skeleton{
+      background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);
+      background-size:200% 100%;
+      animation:shimmer 1.5s infinite;
+      border-radius:6px;
+    }
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  </style>
+</head>
+<body>
+
+<!-- GATE LOGIN -->
+<div id="gate">
+  <div class="gate-logo">Carte<span>Viz</span></div>
+  <div class="gate-title">Admin Dashboard</div>
+  <p class="gate-sub">Entrez le token administrateur pour continuer</p>
+  <div class="gate-input-wrap">
+    <input type="password" class="gate-input" id="gate-input" placeholder="TOKEN_ADMIN_SECRET" />
+    <button class="gate-btn" onclick="checkToken()">ENTRER</button>
+  </div>
+  <p class="gate-error" id="gate-error">Token incorrect</p>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <nav class="topbar">
+    <div class="topbar-logo">Carte<span>Viz</span> <span style="color:var(--muted);font-size:.7rem;margin-left:.5rem">/ ADMIN</span></div>
+    <div class="topbar-right">
+      <span class="topbar-badge">● LIVE</span>
+      <button class="topbar-logout" onclick="logout()">DÉCONNEXION</button>
+    </div>
+  </nav>
+
+  <div class="main">
+
+    <!-- KPIs -->
+    <div class="sec-header" style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div class="sec-label">Vue d'ensemble</div>
+        <div class="sec-title">Tableau de bord</div>
+      </div>
+      <button class="btn-refresh" id="btn-refresh" onclick="loadAll()">↻ Actualiser</button>
+    </div>
+
+    <div class="kpi-grid" id="kpi-grid">
+      <div class="kpi-card"><div class="kpi-icon">📇</div><div class="kpi-val skeleton" style="height:2rem;width:4rem">&nbsp;</div><div class="kpi-label">Total cartes</div></div>
+      <div class="kpi-card"><div class="kpi-icon">⭐</div><div class="kpi-val skeleton" style="height:2rem;width:3rem">&nbsp;</div><div class="kpi-label">Plan Pro</div></div>
+      <div class="kpi-card"><div class="kpi-icon">♾️</div><div class="kpi-val skeleton" style="height:2rem;width:3rem">&nbsp;</div><div class="kpi-label">À vie</div></div>
+      <div class="kpi-card"><div class="kpi-icon">🆓</div><div class="kpi-val skeleton" style="height:2rem;width:3rem">&nbsp;</div><div class="kpi-label">Gratuit</div></div>
+      <div class="kpi-card"><div class="kpi-icon">💰</div><div class="kpi-val skeleton" style="height:2rem;width:5rem">&nbsp;</div><div class="kpi-label">Revenus estimés</div></div>
+      <div class="kpi-card"><div class="kpi-icon">👁️</div><div class="kpi-val skeleton" style="height:2rem;width:4rem">&nbsp;</div><div class="kpi-label">Total vues</div></div>
+    </div>
+
+    <!-- REVENUS DETAIL + REPARTITION -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Revenus estimés</div>
+        <div class="revenus-grid" id="revenus-grid">
+          <div class="rev-item"><div class="rev-val skeleton" style="height:1.2rem;width:5rem;margin:0 auto">&nbsp;</div><div class="rev-label">Ce mois</div></div>
+          <div class="rev-item"><div class="rev-val skeleton" style="height:1.2rem;width:5rem;margin:0 auto">&nbsp;</div><div class="rev-label">Mensuel récurrent</div></div>
+          <div class="rev-item"><div class="rev-val skeleton" style="height:1.2rem;width:5rem;margin:0 auto">&nbsp;</div><div class="rev-label">Total cumulé</div></div>
+        </div>
+        <div id="secteurs-top">
+          <div class="card-title" style="margin-bottom:.75rem">Top secteurs</div>
+          <div class="secteurs-grid" id="secteurs-list"><span style="color:var(--muted);font-size:.8rem">Chargement...</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Répartition des plans</div>
+        <div class="repartition-list" id="repartition-list">
+          <div style="color:var(--muted);font-size:.8rem;font-family:var(--mono)">Chargement...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI CHAT -->
+    <div class="ai-section">
+      <div class="sec-label" style="margin-bottom:.75rem">Intelligence artificielle</div>
+      <div class="ai-card">
+        <div class="ai-header">
+          <span class="ai-dot"></span>
+          <span class="ai-title">ANALYSE IA — Propulsé par Claude</span>
+          <span class="ai-subtitle">Posez vos questions en langage naturel</span>
+        </div>
+        <div class="ai-messages" id="ai-messages">
+          <div class="msg">
+            <div class="msg-avatar ai">AI</div>
+            <div class="msg-content">
+              <div class="msg-role">Claude — Assistant Admin</div>
+              <div class="msg-text">Bonjour ! Je suis votre assistant analytique CarteViz. Posez-moi vos questions sur vos données — revenus, utilisateurs, tendances, recommandations. Je charge les données en temps réel depuis Firestore.</div>
+            </div>
+          </div>
+        </div>
+        <div class="ai-quick">
+          <button class="ai-quick-btn" onclick="quickAsk(this)">Analyse mes revenus</button>
+          <button class="ai-quick-btn" onclick="quickAsk(this)">Quels secteurs dominent ?</button>
+          <button class="ai-quick-btn" onclick="quickAsk(this)">Conseils pour augmenter les conversions</button>
+          <button class="ai-quick-btn" onclick="quickAsk(this)">Résumé global du SaaS</button>
+        </div>
+        <div class="ai-input-wrap">
+          <input type="text" class="ai-input" id="ai-input" placeholder="Ex: Combien de revenus mensuels récurrents ?" onkeydown="if(event.key==='Enter')sendAI()" />
+          <button class="ai-send" id="ai-send" onclick="sendAI()">ENVOYER</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTE CARTES -->
+    <div>
+      <div class="sec-label">Utilisateurs</div>
+      <div class="sec-title" style="margin-bottom:1.25rem">Dernières cartes créées</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="cartes-table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Titre</th>
+              <th>Secteur</th>
+              <th>Plan</th>
+              <th>Vues</th>
+              <th>Créé le</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="cartes-tbody">
+            <tr><td colspan="7" class="cartes-empty">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ═══════════════════════════════════
+  // CONFIG
+  // ═══════════════════════════════════
+  const ADMIN_TOKEN = 'carteviz_admin_2025';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDZbf0-9QLpk0fqQhgKas0d-PbqpPZHfw8",
+    authDomain: "carteviz.firebaseapp.com",
+    projectId: "carteviz",
+    storageBucket: "carteviz.firebasestorage.app",
+    messagingSenderId: "891996442394",
+    appId: "1:891996442394:web:8558489da54b398cdf66a3"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // ═══════════════════════════════════
+  // AUTH GATE
+  // ═══════════════════════════════════
+  function checkToken() {
+    const val = document.getElementById('gate-input').value.trim();
+    if (val === ADMIN_TOKEN) {
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadAll();
+    } else {
+      const err = document.getElementById('gate-error');
+      err.style.display = 'block';
+      err.textContent = 'Token incorrect — accès refusé';
+      setTimeout(() => err.style.display = 'none', 3000);
+    }
+  }
+
+  document.getElementById('gate-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkToken();
+  });
+
+  function logout() {
+    document.getElementById('gate').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('gate-input').value = '';
+  }
+
+  // ═══════════════════════════════════
+  // DONNEES
+  // ═══════════════════════════════════
+  let statsData = {};
+
+  async function loadAll() {
+    const btn = document.getElementById('btn-refresh');
+    btn.classList.add('spin');
+    try {
+      const snap = await db.collection('cartes').get();
+      const cartes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      statsData = computeStats(cartes);
+      renderKPIs(statsData);
+      renderRevenus(statsData);
+      renderRepartition(statsData);
+      renderSecteurs(statsData);
+      renderTable(cartes);
+    } catch(e) {
+      console.error(e);
+    }
+    btn.classList.remove('spin');
+  }
+
+  function computeStats(cartes) {
+    const total = cartes.length;
+    const pro = cartes.filter(c => c.plan === 'pro').length;
+    const lifetime = cartes.filter(c => c.plan === 'lifetime').length;
+    const free = cartes.filter(c => !c.plan || c.plan === 'free').length;
+    const totalVues = cartes.reduce((s, c) => s + (c.vues || 0), 0);
+
+    // Revenus
+    const mrr = pro * 5000;
+    const ltv = lifetime * 25000;
+    const totalRev = mrr + ltv;
+
+    // Secteurs
+    const secteurCount = {};
+    cartes.forEach(c => {
+      if (c.services && Array.isArray(c.services)) {
+        // Deviner le secteur depuis les services
+      }
+    });
+
+    // Top services
+    const serviceCount = {};
+    cartes.forEach(c => {
+      (c.services || []).forEach(s => {
+        serviceCount[s] = (serviceCount[s] || 0) + 1;
+      });
+    });
+    const topServices = Object.entries(serviceCount)
+      .sort((a,b) => b[1]-a[1]).slice(0,8).map(([s]) => s);
+
+    // Cartes recentes
+    const recent = [...cartes].sort((a,b) => {
+      const ta = a.createdAt?.seconds || 0;
+      const tb = b.createdAt?.seconds || 0;
+      return tb - ta;
+    }).slice(0, 20);
+
+    return { total, pro, lifetime, free, totalVues, mrr, ltv, totalRev, topServices, recent };
+  }
+
+  // ═══════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════
+  function renderKPIs(s) {
+    document.getElementById('kpi-grid').innerHTML = `
+      <div class="kpi-card">
+        <div class="kpi-icon">📇</div>
+        <div class="kpi-val">${s.total}</div>
+        <div class="kpi-label">Total cartes</div>
+        <div class="kpi-trend neutral">— toutes</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">⭐</div>
+        <div class="kpi-val" style="color:var(--accent)">${s.pro}</div>
+        <div class="kpi-label">Plan Pro</div>
+        <div class="kpi-trend up">5 000 FCFA/mois</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">♾️</div>
+        <div class="kpi-val" style="color:var(--accent2)">${s.lifetime}</div>
+        <div class="kpi-label">À vie</div>
+        <div class="kpi-trend up">25 000 FCFA/unité</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🆓</div>
+        <div class="kpi-val">${s.free}</div>
+        <div class="kpi-label">Gratuit</div>
+        <div class="kpi-trend neutral">${s.total > 0 ? Math.round(s.free/s.total*100) : 0}% du total</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-val" style="color:var(--accent);font-size:1.4rem">${fmtFCFA(s.totalRev)}</div>
+        <div class="kpi-label">Revenus cumulés</div>
+        <div class="kpi-trend up">MRR: ${fmtFCFA(s.mrr)}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">👁️</div>
+        <div class="kpi-val">${s.totalVues}</div>
+        <div class="kpi-label">Total vues</div>
+        <div class="kpi-trend neutral">${s.total > 0 ? Math.round(s.totalVues/s.total) : 0} moy/carte</div>
+      </div>
+    `;
+  }
+
+  function renderRevenus(s) {
+    document.getElementById('revenus-grid').innerHTML = `
+      <div class="rev-item">
+        <div class="rev-val">${fmtFCFA(s.mrr)}</div>
+        <div class="rev-label">MRR (mensuel)</div>
+      </div>
+      <div class="rev-item">
+        <div class="rev-val">${fmtFCFA(s.ltv)}</div>
+        <div class="rev-label">Lifetime total</div>
+      </div>
+      <div class="rev-item">
+        <div class="rev-val">${fmtFCFA(s.totalRev)}</div>
+        <div class="rev-label">Cumulé total</div>
+      </div>
+    `;
+  }
+
+  function renderRepartition(s) {
+    const total = s.total || 1;
+    const items = [
+      { label: 'Gratuit', val: s.free, color: '#5a6070', pct: Math.round(s.free/total*100) },
+      { label: 'Pro', val: s.pro, color: '#00ff88', pct: Math.round(s.pro/total*100) },
+      { label: 'À vie', val: s.lifetime, color: '#00d4ff', pct: Math.round(s.lifetime/total*100) },
+    ];
+    document.getElementById('repartition-list').innerHTML = items.map(i => `
+      <div class="rep-item">
+        <span class="rep-label" style="color:${i.color}">${i.label}</span>
+        <div class="rep-bar-wrap">
+          <div class="rep-bar" style="width:${i.pct}%;background:${i.color}"></div>
+        </div>
+        <span class="rep-val">${i.val}</span>
+      </div>
+    `).join('');
+  }
+
+  function renderSecteurs(s) {
+    if (!s.topServices.length) {
+      document.getElementById('secteurs-list').innerHTML = '<span style="color:var(--muted);font-size:.8rem">Aucune donnée</span>';
+      return;
+    }
+    document.getElementById('secteurs-list').innerHTML = s.topServices.map((sv, i) =>
+      `<span class="secteur-tag ${i < 3 ? 'top' : ''}">${sv}</span>`
+    ).join('');
+  }
+
+  function renderTable(cartes) {
+    const recent = [...cartes].sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0)).slice(0,20);
+    if (!recent.length) {
+      document.getElementById('cartes-tbody').innerHTML = '<tr><td colspan="7" class="cartes-empty">Aucune carte</td></tr>';
+      return;
+    }
+    const baseUrl = 'https://chniang.github.io/carte_visite/carte.html?slug=';
+    document.getElementById('cartes-tbody').innerHTML = recent.map(c => {
+      const plan = c.plan || 'free';
+      const planClass = plan === 'pro' ? 'plan-pro' : plan === 'lifetime' ? 'plan-lifetime' : 'plan-free';
+      const planLabel = plan === 'pro' ? 'Pro' : plan === 'lifetime' ? 'À vie' : 'Gratuit';
+      const date = c.createdAt?.seconds ? new Date(c.createdAt.seconds*1000).toLocaleDateString('fr-FR') : '—';
+      const secteur = (c.services && c.services[0]) ? c.services[0].substring(0,20) + (c.services[0].length > 20 ? '…' : '') : '—';
+      return `<tr>
+        <td><strong>${c.prenom || ''} ${c.nom || ''}</strong><br><span style="color:var(--muted);font-size:.75rem">${c.slug || ''}</span></td>
+        <td style="color:var(--muted);font-size:.8rem">${(c.titre || '').substring(0,30)}</td>
+        <td style="color:var(--muted);font-size:.78rem">${secteur}</td>
+        <td><span class="plan-badge ${planClass}">${planLabel}</span></td>
+        <td style="font-family:var(--mono)">${c.vues || 0}</td>
+        <td style="color:var(--muted);font-size:.78rem">${date}</td>
+        <td><a href="${baseUrl}${c.slug}" target="_blank" style="color:var(--accent);font-family:var(--mono);font-size:.72rem;text-decoration:none">VOIR →</a></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function fmtFCFA(n) {
+    if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+    if (n >= 1000) return Math.round(n/1000) + 'K';
+    return n + '';
+  }
+
+  // ═══════════════════════════════════
+  // AI CHAT
+  // ═══════════════════════════════════
+  function quickAsk(btn) {
+    document.getElementById('ai-input').value = btn.textContent;
+    sendAI();
+  }
+
+  async function sendAI() {
+    const input = document.getElementById('ai-input');
+    const question = input.value.trim();
+    if (!question) return;
+
+    const send = document.getElementById('ai-send');
+    const messages = document.getElementById('ai-messages');
+
+    // Message user
+    messages.innerHTML += `
+      <div class="msg">
+        <div class="msg-avatar user">TU</div>
+        <div class="msg-content">
+          <div class="msg-role">Vous</div>
+          <div class="msg-text">${question}</div>
+        </div>
+      </div>`;
+    input.value = '';
+    send.disabled = true;
+    messages.scrollTop = messages.scrollHeight;
+
+    // Message loading
+    const loadId = 'load-' + Date.now();
+    messages.innerHTML += `
+      <div class="msg" id="${loadId}">
+        <div class="msg-avatar ai">AI</div>
+        <div class="msg-content">
+          <div class="msg-role">Claude</div>
+          <div class="msg-text loading">Analyse en cours...</div>
+        </div>
+      </div>`;
+    messages.scrollTop = messages.scrollHeight;
+
+    // Contexte
+    const ctx = `Tu es l'assistant analytique de CarteViz, un SaaS de cartes de visite numériques pour le marché sénégalais et africain.
+
+Données actuelles du dashboard:
+- Total cartes: ${statsData.total || 0}
+- Plan Pro: ${statsData.pro || 0} (5 000 FCFA/mois)
+- Plan À vie: ${statsData.lifetime || 0} (25 000 FCFA paiement unique)
+- Plan Gratuit: ${statsData.free || 0}
+- MRR (revenus mensuels récurrents): ${(statsData.mrr || 0).toLocaleString()} FCFA
+- Revenus lifetime cumulés: ${(statsData.ltv || 0).toLocaleString()} FCFA
+- Total revenus cumulés: ${(statsData.totalRev || 0).toLocaleString()} FCFA
+- Total vues cartes: ${statsData.totalVues || 0}
+- Top services: ${(statsData.topServices || []).slice(0,5).join(', ')}
+
+Réponds en français, de façon concise et actionnable. Max 3-4 phrases. Si tu donnes des chiffres, base-toi uniquement sur les données ci-dessus.`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 400,
+          system: ctx,
+          messages: [{ role: 'user', content: question }]
+        })
+      });
+      const data = await res.json();
+      const reply = data.content?.[0]?.text || "Désolé, je n'ai pas pu analyser les données.";
+      document.getElementById(loadId).querySelector('.msg-text').className = 'msg-text';
+      document.getElementById(loadId).querySelector('.msg-text').textContent = reply;
+    } catch(e) {
+      document.getElementById(loadId).querySelector('.msg-text').textContent = "Erreur de connexion à l'IA.";
+    }
+
+    send.disabled = false;
+    messages.scrollTop = messages.scrollHeight;
+  }
+</script>
+</body>
+</html>
