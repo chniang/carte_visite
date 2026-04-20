@@ -311,37 +311,6 @@
       </div>
     </div>
 
-    <!-- AI CHAT -->
-    <div class="ai-section">
-      <div class="sec-label" style="margin-bottom:.75rem">Intelligence artificielle</div>
-      <div class="ai-card">
-        <div class="ai-header">
-          <span class="ai-dot"></span>
-          <span class="ai-title">ANALYSE IA — Propulsé par Claude</span>
-          <span class="ai-subtitle">Posez vos questions en langage naturel</span>
-        </div>
-        <div class="ai-messages" id="ai-messages">
-          <div class="msg">
-            <div class="msg-avatar ai">AI</div>
-            <div class="msg-content">
-              <div class="msg-role">Claude — Assistant Admin</div>
-              <div class="msg-text">Bonjour ! Je suis votre assistant analytique CarteViz. Posez-moi vos questions sur vos données — revenus, utilisateurs, tendances, recommandations. Je charge les données en temps réel depuis Firestore.</div>
-            </div>
-          </div>
-        </div>
-        <div class="ai-quick">
-          <button class="ai-quick-btn" onclick="quickAsk(this)">Analyse mes revenus</button>
-          <button class="ai-quick-btn" onclick="quickAsk(this)">Quels secteurs dominent ?</button>
-          <button class="ai-quick-btn" onclick="quickAsk(this)">Conseils pour augmenter les conversions</button>
-          <button class="ai-quick-btn" onclick="quickAsk(this)">Résumé global du SaaS</button>
-        </div>
-        <div class="ai-input-wrap">
-          <input type="text" class="ai-input" id="ai-input" placeholder="Ex: Combien de revenus mensuels récurrents ?" onkeydown="if(event.key==='Enter')sendAI()" />
-          <button class="ai-send" id="ai-send" onclick="sendAI()">ENVOYER</button>
-        </div>
-      </div>
-    </div>
-
     <!-- LISTE CARTES -->
     <div>
       <div class="sec-label">Utilisateurs</div>
@@ -383,6 +352,226 @@
     messagingSenderId: "891996442394",
     appId: "1:891996442394:web:8558489da54b398cdf66a3"
   };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // ═══════════════════════════════════
+  // AUTH GATE
+  // ═══════════════════════════════════
+  function checkToken() {
+    const val = document.getElementById('gate-input').value.trim();
+    if (val === ADMIN_TOKEN) {
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadAll();
+    } else {
+      const err = document.getElementById('gate-error');
+      err.style.display = 'block';
+      err.textContent = 'Token incorrect — accès refusé';
+      setTimeout(() => err.style.display = 'none', 3000);
+    }
+  }
+
+  document.getElementById('gate-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkToken();
+  });
+
+  function logout() {
+    document.getElementById('gate').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('gate-input').value = '';
+  }
+
+  // ═══════════════════════════════════
+  // DONNEES
+  // ═══════════════════════════════════
+  let statsData = {};
+
+  async function loadAll() {
+    const btn = document.getElementById('btn-refresh');
+    btn.classList.add('spin');
+    try {
+      const snap = await db.collection('cartes').get();
+      const cartes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      statsData = computeStats(cartes);
+      renderKPIs(statsData);
+      renderRevenus(statsData);
+      renderRepartition(statsData);
+      renderSecteurs(statsData);
+      renderTable(cartes);
+    } catch(e) {
+      console.error(e);
+    }
+    btn.classList.remove('spin');
+  }
+
+  function computeStats(cartes) {
+    const total = cartes.length;
+    const pro = cartes.filter(c => c.plan === 'pro').length;
+    const lifetime = cartes.filter(c => c.plan === 'lifetime').length;
+    const free = cartes.filter(c => !c.plan || c.plan === 'free').length;
+    const totalVues = cartes.reduce((s, c) => s + (c.vues || 0), 0);
+
+    // Revenus
+    const mrr = pro * 5000;
+    const ltv = lifetime * 25000;
+    const totalRev = mrr + ltv;
+
+    // Secteurs
+    const secteurCount = {};
+    cartes.forEach(c => {
+      if (c.services && Array.isArray(c.services)) {
+        // Deviner le secteur depuis les services
+      }
+    });
+
+    // Top services
+    const serviceCount = {};
+    cartes.forEach(c => {
+      (c.services || []).forEach(s => {
+        serviceCount[s] = (serviceCount[s] || 0) + 1;
+      });
+    });
+    const topServices = Object.entries(serviceCount)
+      .sort((a,b) => b[1]-a[1]).slice(0,8).map(([s]) => s);
+
+    // Cartes recentes
+    const recent = [...cartes].sort((a,b) => {
+      const ta = a.createdAt?.seconds || 0;
+      const tb = b.createdAt?.seconds || 0;
+      return tb - ta;
+    }).slice(0, 20);
+
+    return { total, pro, lifetime, free, totalVues, mrr, ltv, totalRev, topServices, recent };
+  }
+
+  // ═══════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════
+  function renderKPIs(s) {
+    document.getElementById('kpi-grid').innerHTML = `
+      <div class="kpi-card">
+        <div class="kpi-icon">📇</div>
+        <div class="kpi-val">${s.total}</div>
+        <div class="kpi-label">Total cartes</div>
+        <div class="kpi-trend neutral">— toutes</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">⭐</div>
+        <div class="kpi-val" style="color:var(--accent)">${s.pro}</div>
+        <div class="kpi-label">Plan Pro</div>
+        <div class="kpi-trend up">5 000 FCFA/mois</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">♾️</div>
+        <div class="kpi-val" style="color:var(--accent2)">${s.lifetime}</div>
+        <div class="kpi-label">À vie</div>
+        <div class="kpi-trend up">25 000 FCFA/unité</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🆓</div>
+        <div class="kpi-val">${s.free}</div>
+        <div class="kpi-label">Gratuit</div>
+        <div class="kpi-trend neutral">${s.total > 0 ? Math.round(s.free/s.total*100) : 0}% du total</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-val" style="color:var(--accent);font-size:1.4rem">${fmtFCFA(s.totalRev)}</div>
+        <div class="kpi-label">Revenus cumulés</div>
+        <div class="kpi-trend up">MRR: ${fmtFCFA(s.mrr)}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">👁️</div>
+        <div class="kpi-val">${s.totalVues}</div>
+        <div class="kpi-label">Total vues</div>
+        <div class="kpi-trend neutral">${s.total > 0 ? Math.round(s.totalVues/s.total) : 0} moy/carte</div>
+      </div>
+    `;
+  }
+
+  function renderRevenus(s) {
+    document.getElementById('revenus-grid').innerHTML = `
+      <div class="rev-item">
+        <div class="rev-val">${fmtFCFA(s.mrr)}</div>
+        <div class="rev-label">MRR (mensuel)</div>
+      </div>
+      <div class="rev-item">
+        <div class="rev-val">${fmtFCFA(s.ltv)}</div>
+        <div class="rev-label">Lifetime total</div>
+      </div>
+      <div class="rev-item">
+        <div class="rev-val">${fmtFCFA(s.totalRev)}</div>
+        <div class="rev-label">Cumulé total</div>
+      </div>
+    `;
+  }
+
+  function renderRepartition(s) {
+    const total = s.total || 1;
+    const items = [
+      { label: 'Gratuit', val: s.free, color: '#5a6070', pct: Math.round(s.free/total*100) },
+      { label: 'Pro', val: s.pro, color: '#00ff88', pct: Math.round(s.pro/total*100) },
+      { label: 'À vie', val: s.lifetime, color: '#00d4ff', pct: Math.round(s.lifetime/total*100) },
+    ];
+    document.getElementById('repartition-list').innerHTML = items.map(i => `
+      <div class="rep-item">
+        <span class="rep-label" style="color:${i.color}">${i.label}</span>
+        <div class="rep-bar-wrap">
+          <div class="rep-bar" style="width:${i.pct}%;background:${i.color}"></div>
+        </div>
+        <span class="rep-val">${i.val}</span>
+      </div>
+    `).join('');
+  }
+
+  function renderSecteurs(s) {
+    if (!s.topServices.length) {
+      document.getElementById('secteurs-list').innerHTML = '<span style="color:var(--muted);font-size:.8rem">Aucune donnée</span>';
+      return;
+    }
+    document.getElementById('secteurs-list').innerHTML = s.topServices.map((sv, i) =>
+      `<span class="secteur-tag ${i < 3 ? 'top' : ''}">${sv}</span>`
+    ).join('');
+  }
+
+  function renderTable(cartes) {
+    const recent = [...cartes].sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0)).slice(0,20);
+    if (!recent.length) {
+      document.getElementById('cartes-tbody').innerHTML = '<tr><td colspan="7" class="cartes-empty">Aucune carte</td></tr>';
+      return;
+    }
+    const baseUrl = 'https://chniang.github.io/carte_visite/carte.html?slug=';
+    document.getElementById('cartes-tbody').innerHTML = recent.map(c => {
+      const plan = c.plan || 'free';
+      const planClass = plan === 'pro' ? 'plan-pro' : plan === 'lifetime' ? 'plan-lifetime' : 'plan-free';
+      const planLabel = plan === 'pro' ? 'Pro' : plan === 'lifetime' ? 'À vie' : 'Gratuit';
+      const date = c.createdAt?.seconds ? new Date(c.createdAt.seconds*1000).toLocaleDateString('fr-FR') : '—';
+      const secteur = (c.services && c.services[0]) ? c.services[0].substring(0,20) + (c.services[0].length > 20 ? '…' : '') : '—';
+      return `<tr>
+        <td><strong>${c.prenom || ''} ${c.nom || ''}</strong><br><span style="color:var(--muted);font-size:.75rem">${c.slug || ''}</span></td>
+        <td style="color:var(--muted);font-size:.8rem">${(c.titre || '').substring(0,30)}</td>
+        <td style="color:var(--muted);font-size:.78rem">${secteur}</td>
+        <td><span class="plan-badge ${planClass}">${planLabel}</span></td>
+        <td style="font-family:var(--mono)">${c.vues || 0}</td>
+        <td style="color:var(--muted);font-size:.78rem">${date}</td>
+        <td><a href="${baseUrl}${c.slug}" target="_blank" style="color:var(--accent);font-family:var(--mono);font-size:.72rem;text-decoration:none">VOIR →</a></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function fmtFCFA(n) {
+    if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+    if (n >= 1000) return Math.round(n/1000) + 'K';
+    return n + '';
+  }
+
+  // ═══════════════════════════════════
+  // AI CHAT
+  // ═══════════════════════════════════
+  
+
+  ;
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
@@ -654,23 +843,18 @@ Données actuelles du dashboard:
 
 Réponds en français, de façon concise et actionnable. Max 3-4 phrases. Si tu donnes des chiffres, base-toi uniquement sur les données ci-dessus.`;
 
-    try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        try {
+      const apiRes = await fetch('https://carteviz-backend.vercel.app/api/ai-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 400,
-          system: ctx,
-          messages: [{ role: 'user', content: question }]
-        })
+        body: JSON.stringify({ question, context: ctx })
       });
-      const data = await res.json();
-      const reply = data.content?.[0]?.text || "Désolé, je n'ai pas pu analyser les données.";
+      const data = await apiRes.json();
+      const reply = data.reply || data.error || "Erreur de connexion.";
       document.getElementById(loadId).querySelector('.msg-text').className = 'msg-text';
       document.getElementById(loadId).querySelector('.msg-text').textContent = reply;
     } catch(e) {
-      document.getElementById(loadId).querySelector('.msg-text').textContent = "Erreur de connexion à l'IA.";
+      document.getElementById(loadId).querySelector('.msg-text').textContent = "Erreur de connexion a l'IA.";
     }
 
     send.disabled = false;
