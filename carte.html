@@ -551,6 +551,7 @@
       <p class="qr-label">📲 Scannez pour partager cette carte</p>
       <div id="qr-container"></div>
       <span class="btn-dl-qr" onclick="downloadQR()">⬇️ Télécharger le QR code</span>
+      <span class="btn-dl-qr" onclick="downloadVCard()">📇 Télécharger la vCard</span>
     </div>
   </div>
 
@@ -659,6 +660,45 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// ── Normalisation numéros WhatsApp (Sénégal +221) ──────────────
+function normalizeWA(tel) {
+  let t = tel.replace(/[\s()\-\.]/g, '');
+  if (t.startsWith('+')) t = t.slice(1);
+  if (t.startsWith('00')) t = t.slice(2);
+  // Numéro local sénégalais sans indicatif (8 ou 9 chiffres commençant par 7)
+  if (t.length <= 9 && t.startsWith('7')) t = '221' + t;
+  return t.replace(/[^0-9]/g, '');
+}
+// ───────────────────────────────────────────────────────────────
+
+// ── Téléchargement vCard (UTF-8 + BOM) ─────────────────────────
+function downloadVCard() {
+  const d = window._carteData;
+  if (!d) return;
+  const prenom = d.prenom || '';
+  const nom = d.nom || '';
+  const tel = d.tel ? normalizeWA(d.tel) : '';
+  const lines = [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    'FN;CHARSET=UTF-8:' + prenom + ' ' + nom,
+    'N;CHARSET=UTF-8:' + nom + ';' + prenom + ';;;',
+    d.titre ? 'TITLE;CHARSET=UTF-8:' + d.titre : '',
+    d.email ? 'EMAIL:' + d.email : '',
+    tel ? 'TEL;TYPE=CELL:+' + tel : '',
+    d.lieu ? 'ADR;CHARSET=UTF-8:;;;' + d.lieu + ';;;' : '',
+    'END:VCARD'
+  ].filter(Boolean).join('\r\n');
+
+  const blob = new Blob(['\uFEFF' + lines], { type: 'text/vcard;charset=utf-8' });
+  const a = document.createElement('a');
+  a.download = (prenom + '-' + nom).toLowerCase().replace(/\s+/g, '-') + '.vcf';
+  a.href = URL.createObjectURL(blob);
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+// ───────────────────────────────────────────────────────────────
+
 function getSlug() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('slug')) return params.get('slug');
@@ -691,10 +731,14 @@ function detectDevice() {
 }
 
 async function getCountry() {
+  const cached = sessionStorage.getItem('carteviz_geo');
+  if (cached) return JSON.parse(cached);
   try {
     const r = await fetch('https://ipapi.co/json/');
     const d = await r.json();
-    return { country: d.country_name || 'Inconnu', city: d.city || '', flag: d.country_code || '' };
+    const geo = { country: d.country_name || 'Inconnu', city: d.city || '', flag: d.country_code || '' };
+    sessionStorage.setItem('carteviz_geo', JSON.stringify(geo));
+    return geo;
   } catch {
     return { country: 'Inconnu', city: '', flag: '' };
   }
@@ -734,10 +778,22 @@ async function loadCarte() {
   if (!slug) { showError("Aucun identifiant dans l'URL. Vérifiez le lien."); return; }
 
   try {
-    const doc = await db.collection('cartes').doc(slug).get();
-    if (!doc.exists) { showError(`La carte "${slug}" n'existe pas.`); return; }
+    const ownerTokenEarly = getOwnerToken();
+    const cacheKey = 'carteviz_card_' + slug;
+    let d;
 
-    const d = doc.data();
+    if (!ownerTokenEarly && sessionStorage.getItem(cacheKey)) {
+      try { d = JSON.parse(sessionStorage.getItem(cacheKey)); } catch(e) { d = null; }
+    }
+
+    if (!d) {
+      const doc = await db.collection('cartes').doc(slug).get();
+      if (!doc.exists) { showError(`La carte "${slug}" n'existe pas.`); return; }
+      d = doc.data();
+      if (!ownerTokenEarly) {
+        try { sessionStorage.setItem(cacheKey, JSON.stringify(d)); } catch(e) {}
+      }
+    }
       window._carteData = d;
       setupUpgradeBanner(d);
       // Appliquer thème pour tous les visiteurs
@@ -783,7 +839,7 @@ async function loadCarte() {
 
     // Contacts
     const contacts = [];
-    if (d.tel)   contacts.push({ href:`https://wa.me/${d.tel.replace(/\D/g,'')}`, icon:'📱', label:'WhatsApp / Téléphone', val:d.tel });
+    if (d.tel)   contacts.push({ href:`https://wa.me/${normalizeWA(d.tel)}`, icon:'📱', label:'WhatsApp / Téléphone', val:d.tel });
     if (d.email) contacts.push({ href:`mailto:${d.email}`, icon:'✉️', label:'Email', val:d.email });
     if (d.lieu)  contacts.push({ href:`https://maps.google.com?q=${encodeURIComponent(d.lieu)}`, icon:'📍', label:'Localisation', val:d.lieu, blank:true });
 
@@ -843,7 +899,7 @@ async function loadCarte() {
     // WhatsApp CTA + tracker clics
     if (d.tel) {
       const msg = encodeURIComponent(`Bonjour ${d.prenom||''}, j'ai vu votre carte CarteViz et je suis intéressé(e) par vos services.`);
-      const waUrl = `https://wa.me/${d.tel.replace(/\D/g,'')}?text=${msg}`;
+      const waUrl = `https://wa.me/${normalizeWA(d.tel)}?text=${msg}`;
       const btnWa = document.getElementById('btn-wa');
       btnWa.href = waUrl;
       btnWa.addEventListener('click', () => {
@@ -856,7 +912,7 @@ async function loadCarte() {
     }
 
     // QR Code
-    const carteURL = `${window.location.origin}${window.location.pathname}?slug=${slug}`;
+    const carteURL = encodeURI(`${window.location.origin}${window.location.pathname}?slug=${slug}`);
     new QRCode(document.getElementById('qr-container'), {
       text: carteURL, width: 160, height: 160,
       colorDark: '#1a0a3a', colorLight: '#ffffff',
@@ -952,7 +1008,7 @@ function openServiceModal(serviceName) {
   if (!isActive || !validOwner) return; // Modal uniquement si Pro + bon token
 
   const desc = getServiceDescription(serviceName, d.services_descriptions);
-  const tel = d.tel ? d.tel.replace(/[^0-9+]/g, '') : '';
+  const tel = d.tel ? normalizeWA(d.tel) : '';
   const msg = encodeURIComponent("Bonjour, je suis intéressé par votre service : " + serviceName + ". Pouvez-vous me donner plus d'informations ?");
   const waUrl = 'https://wa.me/' + tel + '?text=' + msg;
 

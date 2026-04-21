@@ -10,6 +10,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
 
+  <!-- QR Code -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
   <!-- Firebase SDK v10 (compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -1375,6 +1378,16 @@
     return tel.replace(/[\s\-\(\)]/g, '');
   }
 
+  // ── Normalisation numéros WhatsApp (Sénégal +221) ──────────────
+  function normalizeWA(tel) {
+    let t = tel.replace(/[\s()\-\.]/g, "");
+    if (t.startsWith("+")) t = t.slice(1);
+    if (t.startsWith("00")) t = t.slice(2);
+    if (t.length <= 9 && t.startsWith("7")) t = "221" + t;
+    return t.replace(/[^0-9]/g, "");
+  }
+  // ───────────────────────────────────────────────────────────────
+
   // ══════════════════════════════════════════
   // 3. PREVIEW EN TEMPS RÉEL
   // ══════════════════════════════════════════
@@ -1523,16 +1536,30 @@
       const ownerUrl = `${window.location.origin}${window.location.pathname.replace('index_saas.html','').replace('carte.html','')}carte.html?slug=${slug}&owner=${token}`;
       alert.className = 'success';
       alert.style.display = 'block';
+      const shareMsg = encodeURIComponent("Voici ma carte de visite numerique : " + url);
+      const waShareUrl = "https://wa.me/?text=" + shareMsg;
       alert.innerHTML = `
         🎉 <strong>Votre carte est en ligne !</strong><br/>
-        Partagez ce lien par WhatsApp :<br/>
+        <a href="${waShareUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;margin:.5rem 0;padding:8px 16px;background:#25d366;color:#fff;border-radius:8px;font-weight:700;text-decoration:none;font-size:.88rem;">💬 Partager sur WhatsApp</a><br/>
         <a class="alert-url" href="${url}" target="_blank">${url}</a>
+        <div id="success-qr" style="margin:.75rem auto 0;display:flex;justify-content:center"></div>
         <div style="margin-top:.75rem;padding:.75rem;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.3);border-radius:8px;">
           <div style="font-size:.78rem;color:#a0a0c0;margin-bottom:.35rem;">🔐 Votre lien privé (dashboard + stats) — à garder précieusement :</div>
           <a class="alert-url" href="${ownerUrl}" target="_blank" style="color:#a78bfa">${ownerUrl}</a>
           <div style="font-size:.72rem;color:#a0a0c0;margin-top:.35rem;">⚠️ Sauvegardez ce lien dans vos favoris ou sur WhatsApp. Il ne sera plus affiché.</div>
         </div>
       `;
+      // QR code avec encodeURI pour compatibilité accents/slugs
+      setTimeout(function() {
+        const qrEl = document.getElementById("success-qr");
+        if (qrEl && typeof QRCode !== "undefined") {
+          new QRCode(qrEl, {
+            text: encodeURI(url), width: 120, height: 120,
+            colorDark: "#1a0a3a", colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+          });
+        }
+      }, 50);
 
       // Optionnel : reset form
       // e.target.reset(); updatePreview();
