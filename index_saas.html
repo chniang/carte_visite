@@ -1885,8 +1885,8 @@
 
     reader.onload = (e) => {
       img.onload = () => {
-        // Redimensionner à max 300x300 px
-        const MAX = 300;
+        // Redimensionner à max 200x200 px
+        const MAX = 200;
         let w = img.width, h = img.height;
         if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
         else { if (h > MAX) { w = w * MAX / h; h = MAX; } }
@@ -1894,50 +1894,56 @@
         canvas.height = Math.round(h);
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        // Qualité 0.7 → image légère ~15-30 KB
-        const compressed = canvas.toDataURL('image/jpeg', 0.7);
+        // Qualité 0.5 → image légère ~8-15 KB
+        const compressed = canvas.toDataURL('image/jpeg', 0.5);
 
-        // Prévisualisation
+        // Prévisualisation immédiate avec le base64 local
         const preview = document.getElementById('photo-preview');
-        preview.innerHTML = `<img src="${compressed}" alt="preview" />`;
+        preview.innerHTML = "<img src=\"" + compressed + "\" alt=\"preview\" />";
         preview.classList.add('has-photo');
         document.getElementById('btn-photo-remove').style.display = 'block';
 
-        // Stocker
-        uploadedPhotoUrl = compressed;
-        document.getElementById('f-photo').value = compressed;
-        updatePreview();
+        // Afficher état "upload en cours"
+        const progress = document.getElementById('photo-upload-progress');
+        if (progress) { progress.style.display = 'block'; progress.textContent = "⏳ Upload en cours..."; }
+
+        // Récupérer le slug provisoire depuis le formulaire
+        const prenom = document.getElementById('f-prenom').value.trim();
+        const nom = document.getElementById('f-nom').value.trim();
+        const slug = generateSlug(prenom || 'user', nom || 'photo');
+
+        // Envoyer à Cloudflare via le backend Vercel
+        fetch('https://carteviz-backend.vercel.app/api/upload-photo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photo: compressed, slug: slug })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.url) {
+            // Stocker l'URL Cloudflare (pas le base64)
+            uploadedPhotoUrl = data.url;
+            document.getElementById('f-photo').value = data.url;
+            if (progress) { progress.style.display = 'block'; progress.textContent = "✅ Photo uploadée"; }
+          } else {
+            // Fallback : stocker le base64 si Cloudflare échoue
+            uploadedPhotoUrl = compressed;
+            document.getElementById('f-photo').value = compressed;
+            if (progress) { progress.style.display = 'block'; progress.textContent = "⚠️ Upload Cloudflare échoué — base64 utilisé"; }
+          }
+          updatePreview();
+        })
+        .catch(function() {
+          // Fallback réseau : stocker le base64
+          uploadedPhotoUrl = compressed;
+          document.getElementById('f-photo').value = compressed;
+          if (progress) { progress.style.display = 'block'; progress.textContent = "⚠️ Hors ligne — base64 utilisé"; }
+          updatePreview();
+        });
       };
       img.src = e.target.result;
     };
     reader.readAsDataURL(file);
-  }
-
-  async function uploadPhotoToStorage(file) {
-    const slug = generateSlug(
-      document.getElementById('f-prenom').value.trim(),
-      document.getElementById('f-nom').value.trim() || 'user'
-    );
-    const ext = file.name.split('.').pop();
-    const ref = window.storage.ref(`photos/${slug}_${Date.now()}.${ext}`);
-
-    try {
-      const snap = await ref.put(file);
-      uploadedPhotoUrl = await snap.ref.getDownloadURL();
-      document.getElementById('f-photo').value = uploadedPhotoUrl;
-      updatePreview();
-      console.log('✅ Photo uploadée:', uploadedPhotoUrl);
-    } catch(e) {
-      console.warn('Upload Storage échoué, utilisation base64:', e.message);
-      // Fallback base64
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        uploadedPhotoUrl = ev.target.result;
-        document.getElementById('f-photo').value = uploadedPhotoUrl;
-        updatePreview();
-      };
-      reader.readAsDataURL(file);
-    }
   }
 
   function removePhoto() {
