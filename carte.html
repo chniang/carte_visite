@@ -1156,14 +1156,19 @@ async function loadDashboard() {
     document.getElementById('d-vues').textContent = carteData.vues || 0;
     document.getElementById('d-wa').textContent = carteData.clics_whatsapp || 0;
 
-    // Récupérer les visites
+    // Récupérer les visites (sans orderBy pour éviter l'index composé)
     const visitesSnap = await db.collection('visites')
       .where('slug', '==', slug)
-      .orderBy('timestamp', 'desc')
       .limit(100)
       .get();
 
-    const visites = visitesSnap.docs.map(d => d.data());
+    const visites = visitesSnap.docs
+      .map(d => d.data())
+      .sort((a, b) => {
+        const ta = a.timestamp ? a.timestamp.toMillis() : 0;
+        const tb = b.timestamp ? b.timestamp.toMillis() : 0;
+        return tb - ta;
+      });
 
     if (visites.length === 0) {
       ['d-devices','d-sources','d-countries','d-recent'].forEach(id => {
