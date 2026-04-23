@@ -831,11 +831,15 @@ async function loadCarte() {
       // Appliquer thème pour tous les visiteurs
       if (d.theme_color) loadTheme(d.theme_color);
 
-    // Incrémenter vues + enregistrer la visite
-    db.collection('cartes').doc(slug).update({
-      vues: firebase.firestore.FieldValue.increment(1)
-    }).catch(()=>{});
-    recordVisit(slug);
+    // Incrémenter vues + enregistrer la visite (sauf owner)
+    const urlParams = new URLSearchParams(window.location.search);
+    const isOwnerVisit = urlParams.get('owner');
+    if (!isOwnerVisit) {
+      db.collection('cartes').doc(slug).update({
+        vues: firebase.firestore.FieldValue.increment(1)
+      }).catch(()=>{});
+      recordVisit(slug);
+    }
 
     // Vérifier si c'est le propriétaire
     const ownerToken = getOwnerToken();
