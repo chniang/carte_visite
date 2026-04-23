@@ -1157,7 +1157,6 @@ async function loadDashboard() {
     // Métriques depuis la carte
     const carteDoc = await db.collection('cartes').doc(slug).get();
     const carteData = carteDoc.data();
-    document.getElementById('d-vues').textContent = carteData.vues || 0;
     document.getElementById('d-wa').textContent = carteData.clics_whatsapp || 0;
 
     // Récupérer les visites (sans orderBy pour éviter l'index composé)
@@ -1173,6 +1172,8 @@ async function loadDashboard() {
         const tb = b.timestamp ? b.timestamp.toMillis() : 0;
         return tb - ta;
       });
+
+    document.getElementById('d-vues').textContent = visites.length;
 
     if (visites.length === 0) {
       ['d-devices','d-sources','d-countries','d-recent'].forEach(id => {
