@@ -17,11 +17,12 @@ Un professionnel crée sa carte en 2 minutes, reçoit un lien personnalisé et l
 - Base de données : Firebase Firestore (projet: carteviz, région: europe-west1)
 - Hébergement frontend : GitHub Pages
 - Hébergement backend : Vercel (carteviz-backend.vercel.app)
-- Fonts : Plus Jakarta Sans + DM Sans (Google Fonts)
+- Fonts : Plus Jakarta Sans + DM Sans (hébergées localement dans /fonts/)
 - Thème : violet/indigo — bg #0a0a14, accent #a78bfa
 - Paiement : PayTech (Wave + Orange Money + Carte bancaire)
-- Géolocalisation visiteurs : ipapi.co
+- Géolocalisation visiteurs : ipapi.co (lazy, cache sessionStorage)
 - QR Code : qrcodejs (CDN Cloudflare)
+- Stockage photos : Supabase Storage (bucket "photos", projet xpdfwsirpdmmpxeqkpuj, eu-west-1)
 
 ## Firebase
 - Projet ID : carteviz
@@ -35,7 +36,7 @@ Un professionnel crée sa carte en 2 minutes, reçoit un lien personnalisé et l
 - services: [] — liste des services
 - services_descriptions: {} — descriptions personnalisées par service (Pro)
 - liens: [{type, url}] — réseaux sociaux
-- photo: base64 compressé 300x300px JPEG 0.7
+- photo: URL Supabase Storage (ex: https://xpdfwsirpdmmpxeqkpuj.supabase.co/storage/v1/object/public/photos/...) ou base64 fallback
 - owner_token: string — token secret propriétaire
 - vues: number
 - clics_whatsapp: number
@@ -48,8 +49,17 @@ Un professionnel crée sa carte en 2 minutes, reçoit un lien personnalisé et l
 ## Backend Vercel
 - URL : https://carteviz-backend.vercel.app
 - api/create-payment.js : initie la transaction PayTech
-- api/ipn-callback.js : confirme paiement + met à jour Firestore
-- Variables d'env : PAYTECH_API_KEY, PAYTECH_API_SECRET
+- api/ipn-callback.js : confirme paiement + met à jour Firestore (HMAC vérifié)
+- api/upload-photo.js : reçoit base64, upload vers Supabase Storage, retourne URL publique
+- Variables d'env : PAYTECH_API_KEY, PAYTECH_API_SECRET, FIREBASE_API_KEY, PRODUCTION_URL, SUPABASE_URL, SUPABASE_SERVICE_KEY
+
+## Variables Vercel backend (ne jamais committer les valeurs secrètes)
+- PRODUCTION_URL = https://carteviz-backend.vercel.app
+- FIREBASE_API_KEY = AIzaSyDZbf0-9QLpk0fqQhgKas0d-PbqpPZHfw8
+- SUPABASE_URL = https://xpdfwsirpdmmpxeqkpuj.supabase.co
+- SUPABASE_SERVICE_KEY = [voir Supabase Dashboard → Settings → API → service_role]
+- PAYTECH_API_KEY = [voir dashboard paytech.sn]
+- PAYTECH_API_SECRET = [voir dashboard paytech.sn]
 
 ## Modèle de revenus
 - Gratuit : carte + URL + QR code + compteur vues
@@ -71,12 +81,13 @@ Un professionnel crée sa carte en 2 minutes, reçoit un lien personnalisé et l
 
 ## Règles importantes
 1. Toujours modifier les HTML via scripts Python patch (jamais remplacement direct)
-2. Photos stockées en base64 compressé 300x300px JPEG 0.7 (Firebase Storage indisponible)
+2. Photos uploadées via api/upload-photo.js → Supabase Storage → URL stockée dans Firestore. Fallback base64 si Supabase indisponible.
 3. Dashboard et features Pro accessibles via &owner=TOKEN uniquement
 4. Token validé côté client : owner === d.owner_token
-5. Clés PayTech uniquement dans les variables d'env Vercel
+5. Clés secrètes (PayTech, Supabase, Firebase) uniquement dans les variables d'env Vercel — jamais dans le code
 6. vercel.json doit être généré via Python (encodage PowerShell défaillant)
 7. Pas d'apostrophes simples dans les strings JS — utiliser guillemets doubles ou unicode
+8. Firestore rules déployées : plan/plan_expire/owner_token non modifiables côté client
 
 ## Commandes utiles
 ```powershell
@@ -99,8 +110,20 @@ npx vercel --prod
 ```
 
 ## Phase actuelle
-Phase 2 terminée ✅
-Phase 3 à venir : multi-cartes, API REST, analytics Looker Studio
+Phase 2 terminée ✅ — Phase 3 en cours
+
+### État
+- Migration photos : Supabase Storage (bucket "photos", projet xpdfwsirpdmmpxeqkpuj, eu-west-1) ✅
+- Firestore sécurisé : rules déployées, cartes de test supprimées ✅
+- Carte cheikh-niang active (owner URL : carte.html?slug=cheikh-niang&owner=8rtxla0w9grq4860)
+- PayTech mode TEST — activation production prochaine (recharger 10 000 FCFA)
+- Domaine carteviz.sn — achat prévu prochainement (~15 000 FCFA)
+
+### Ce qui reste (Phase 3)
+1. Activer PayTech production (recharger solde 10 000 FCFA)
+2. Acheter domaine carteviz.sn
+3. Migration Vercel + domaine custom
+4. Multi-cartes, API REST, analytics Looker Studio
 
 ## PayTech
 - Compte Business créé sur paytech.sn
