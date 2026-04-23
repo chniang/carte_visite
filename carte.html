@@ -1206,8 +1206,14 @@ async function loadDashboard() {
     }).join('');
 
   } catch(err) {
-    console.error('Dashboard error:', err);
-    document.getElementById('d-recent').innerHTML = '<div class="empty-state">Erreur de chargement</div>';
+    console.error('Dashboard error:', err.message, err);
+    const errMsg = '<div class="empty-state">Erreur: ' + err.message + '</div>';
+    ['d-devices','d-sources','d-countries','d-recent'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.innerHTML.includes('Chargement')) el.innerHTML = errMsg;
+    });
+    const recentEl = document.getElementById('d-recent');
+    if (recentEl) recentEl.innerHTML = errMsg;
   }
 }
 
