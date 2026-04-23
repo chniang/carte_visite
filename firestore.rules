@@ -11,7 +11,8 @@ service cloud.firestore {
     }
     match /visites/{id} {
       allow create: if true;
-      allow read, update, delete: if false;
+      allow read: if true;
+      allow update, delete: if false;
     }
   }
 }
