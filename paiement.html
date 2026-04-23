@@ -307,6 +307,37 @@
 
   .back-link:hover { color: var(--accent); }
 
+
+  .launch-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 20px;
+    white-space: nowrap;
+    z-index: 2;
+  }
+
+  .pay-note {
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  a.btn-pay {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   @media (max-width: 600px) {
     .plans { grid-template-columns: 1fr; }
   }
@@ -350,7 +381,7 @@
     <!-- Pro -->
     <div class="plan-card featured">
       <div class="plan-name">Pro</div>
-      <div class="plan-price">2 500 <span>FCFA/mois</span></div>
+      <div class="plan-price">1 500 <span>FCFA/mois</span></div>
       <div class="plan-desc">Pour les professionnels actifs</div>
       <ul class="plan-features">
         <li>Tout le plan Gratuit</li>
@@ -360,16 +391,17 @@
         <li>Personnalisation thème</li>
         <li>Support prioritaire</li>
       </ul>
-      <button class="btn-pay btn-pay-pro" onclick="initPayment('monthly')">
-        <span class="btn-text">💳 Payer 2 500 FCFA</span>
-        <div class="spinner"></div>
-      </button>
+      <a id="btnWaPro" href="#" class="btn-pay btn-pay-pro" target="_blank" rel="noopener">
+        💬 Payer 1 500 FCFA via WhatsApp
+      </a>
+      <p class="pay-note">Paiement via Wave au +221 77 636 27 14 · Orange Money bientôt disponible</p>
     </div>
 
     <!-- À vie -->
-    <div class="plan-card">
+    <div class="plan-card" style="position:relative">
+      <div class="launch-badge">⚡ Offre de lancement — 50 places</div>
       <div class="plan-name">À Vie</div>
-      <div class="plan-price">15 000 <span>FCFA</span></div>
+      <div class="plan-price">10 000 <span>FCFA</span></div>
       <div class="plan-desc">Paiement unique, accès illimité</div>
       <ul class="plan-features">
         <li>Tout le plan Pro</li>
@@ -379,10 +411,10 @@
         <li>Badge "Membre fondateur"</li>
         <li>Support VIP</li>
       </ul>
-      <button class="btn-pay btn-pay-lifetime" onclick="initPayment('lifetime')">
-        <span class="btn-text">🔥 Payer 15 000 FCFA</span>
-        <div class="spinner"></div>
-      </button>
+      <a id="btnWaLifetime" href="#" class="btn-pay btn-pay-lifetime" target="_blank" rel="noopener">
+        💬 Payer 10 000 FCFA via WhatsApp
+      </a>
+      <p class="pay-note">Paiement via Wave au +221 77 636 27 14 · Orange Money bientôt disponible</p>
     </div>
 
   </div>
@@ -417,11 +449,14 @@
     setTimeout(() => t.classList.remove('show'), 4000);
   }
 
-  async function initPayment(plan) {
-    if (!slug || !token) {
-      showToast('❌ Accès invalide — lien propriétaire requis', 'error');
-      return;
-    }
+  // Liens WhatsApp dynamiques avec le slug
+  function buildWaLinks() {
+    var msgPro = encodeURIComponent("Je veux le plan Pro 1500 FCFA/mois - Ma carte : " + (slug || ""));
+    var msgLifetime = encodeURIComponent("Je veux le plan A vie 10000 FCFA - Ma carte : " + (slug || ""));
+    document.getElementById("btnWaPro").href = "https://wa.me/221776362714?text=" + msgPro;
+    document.getElementById("btnWaLifetime").href = "https://wa.me/221776362714?text=" + msgLifetime;
+  }
+  buildWaLinks();
 
     // Identifier le bouton cliqué
     const btnIndex = plan === 'monthly' ? 0 : 1;
