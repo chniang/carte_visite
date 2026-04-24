@@ -785,7 +785,7 @@ async function recordVisit(slug) {
       device: detectDevice(),
       source: detectSource(),
       country: geo.country,
-      city: geo.city,
+      region: geo.region,
       country_code: geo.flag
     };
     await db.collection('visites').add(visitData);
@@ -1202,7 +1202,7 @@ async function loadDashboard() {
         <div class="visite-left">
           <span class="visite-flag">${flag}</span>
           <div>
-            <div class="visite-info">${v.country || 'Inconnu'} ${v.city ? '· '+v.city : ''}</div>
+            <div class="visite-info">${v.country || 'Inconnu'} ${v.region ? '· '+v.region : ''}</div>
             <div class="visite-sub">${deviceIcon} ${v.device || '—'} · ${v.source || '—'}</div>
           </div>
         </div>
