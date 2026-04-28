@@ -577,7 +577,7 @@
     }
     .pc-v3 {
       background: var(--surface);
-      border: 1px solid rgba(139,92,246,0.3);
+      border: 1px solid var(--border);
       border-radius: 16px;
       padding: 2rem;
       position: relative;
@@ -586,88 +586,10 @@
       flex-direction: column;
     }
     .pc-v3:hover {
-      transform: translateY(-4px);
+      transform: translateY(-5px);
       box-shadow: 0 16px 40px rgba(0,0,0,0.4);
-      transition: transform 0.2s, box-shadow 0.2s;
     }
-    .pc-selected {
-      border: 2px solid var(--accent) !important;
-      box-shadow: 0 0 0 3px rgba(167,139,250,0.18), 0 8px 32px rgba(139,92,246,0.18) !important;
-    }
-    .pc-price-hint {
-      font-size: .72rem;
-      color: var(--muted);
-      text-align: center;
-      margin-top: .75rem;
-      padding-top: .6rem;
-      border-top: 1px solid var(--border);
-      opacity: .7;
-    }
-    /* Modal paiement */
-    #modal-paiement {
-      display: none;
-      position: fixed; inset: 0; z-index: 9999;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(4px);
-      align-items: center; justify-content: center;
-    }
-    #modal-paiement.open { display: flex; animation: fadeInModal .2s ease; }
-    @keyframes fadeInModal {
-      from { opacity: 0; transform: scale(.96); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-    .modal-card {
-      background: #12122a;
-      border: 1px solid rgba(139,92,246,0.35);
-      border-radius: 20px;
-      padding: 2rem;
-      max-width: 420px; width: 90%;
-      position: relative;
-    }
-    .modal-close {
-      position: absolute; top: 1rem; right: 1rem;
-      background: none; border: none; color: var(--muted);
-      font-size: 1.3rem; cursor: pointer; line-height: 1;
-    }
-    .modal-close:hover { color: var(--text); }
-    .modal-title {
-      font-family: "DM Sans", sans-serif;
-      font-size: 1.2rem; font-weight: 700;
-      color: var(--text); margin-bottom: .5rem;
-    }
-    .modal-price-line {
-      font-size: 1.5rem; font-weight: 800;
-      color: #a78bfa; margin-bottom: .25rem;
-    }
-    .modal-subtitle {
-      font-size: .82rem; color: var(--muted);
-      margin-bottom: 1.5rem; line-height: 1.5;
-    }
-    .modal-btn {
-      display: block; width: 100%;
-      padding: .8rem; border-radius: 10px;
-      font-family: "DM Sans", sans-serif;
-      font-weight: 700; font-size: .9rem;
-      cursor: pointer; transition: all .2s;
-      margin-bottom: .75rem; text-align: center;
-      border: none;
-    }
-    .modal-btn-disabled {
-      background: rgba(255,255,255,0.06);
-      color: rgba(255,255,255,0.3);
-      cursor: not-allowed;
-    }
-    .modal-btn-continue {
-      background: linear-gradient(135deg, #a78bfa, #818cf8);
-      color: #fff;
-      box-shadow: 0 4px 20px rgba(139,92,246,0.35);
-    }
-    .modal-btn-continue:hover { box-shadow: 0 8px 30px rgba(139,92,246,0.5); }
-    .pc-badge-lifetime {
-      background: linear-gradient(90deg, #f97316, #ef4444) !important;
-      color: #fff !important;
-    }
-        .pc-v3.pc-popular {
+    .pc-v3.pc-popular {
       border-color: rgba(245,166,35,0.5);
       background: linear-gradient(160deg, #1e2a14, #161b22);
     }
@@ -746,7 +668,6 @@
     h1 em { 
       background: linear-gradient(90deg, #a78bfa, #818cf8) !important;
       -webkit-background-clip: text !important;
-      background-clip: text !important;
       -webkit-text-fill-color: transparent !important;
       color: transparent !important;
     }
@@ -803,9 +724,6 @@
     .pc-v3.pc-popular .pc-btn {
       background: linear-gradient(135deg, #a78bfa, #818cf8) !important;
       color: #fff !important;
-    }
-    #pc-lifetime {
-      background: linear-gradient(160deg, #1a120d, #1a1422) !important;
     }
     .nav-logo span { color: #a78bfa !important; }
     .footer-brand span { color: #a78bfa !important; }
@@ -1342,105 +1260,94 @@
   <div class="pricing-grid-v3">
 
     <!-- GRATUIT -->
-    <div class="pc-v3 pc-selected" id="pc-free" onclick="selectPlan('free', this)">
+    <div class="pc-v3">
       <div class="pc-name">Gratuit</div>
+      <div class="pc-amount">0 FCFA</div>
+      <div class="pc-period">Pour toujours · aucune carte requise</div>
       <ul class="pc-features">
         <li class="pc-feat-item">
-          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Carte de visite numérique</span></div>
+          <div class="pc-feat-top"><span class="pc-check">✓</span><span class="pc-feat-name">Carte de visite numérique</span></div>
           <p class="pc-feat-desc">Une page web pro à ton nom, accessible depuis n'importe quel téléphone sans application.</p>
         </li>
         <li class="pc-feat-item">
-          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">URL personnalisée</span></div>
+          <div class="pc-feat-top"><span class="pc-check">✓</span><span class="pc-feat-name">URL personnalisée</span></div>
           <p class="pc-feat-desc">Ton lien unique carteviz.com/prenom-nom à partager par WhatsApp, email ou SMS.</p>
         </li>
         <li class="pc-feat-item">
-          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">QR code téléchargeable</span></div>
+          <div class="pc-feat-top"><span class="pc-check">✓</span><span class="pc-feat-name">QR code téléchargeable</span></div>
           <p class="pc-feat-desc">Un QR code PNG à imprimer sur tes documents ou flyers. Scannable depuis n'importe quel téléphone.</p>
         </li>
         <li class="pc-feat-item">
-          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Bouton WhatsApp intégré</span></div>
+          <div class="pc-feat-top"><span class="pc-check">✓</span><span class="pc-feat-name">Bouton WhatsApp intégré</span></div>
           <p class="pc-feat-desc">Le client clique et ouvre directement une conversation WhatsApp avec un message pré-rempli.</p>
         </li>
         <li class="pc-feat-item">
-          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Compteur de vues</span></div>
+          <div class="pc-feat-top"><span class="pc-check">✓</span><span class="pc-feat-name">Compteur de vues</span></div>
           <p class="pc-feat-desc">Vois combien de personnes ont visité ta carte au total.</p>
         </li>
       </ul>
-      <button class="pc-btn" onclick="event.stopPropagation();selectPlan('free',document.getElementById('pc-free'));document.getElementById('creer').scrollIntoView({behavior:'smooth'})">Commencer gratuitement</button>
-      <p class="pc-price-hint">Prix affiché lors de la génération</p>
+      <a href="#creer" class="pc-btn">Commencer gratuitement</a>
     </div>
 
     <!-- PRO -->
-    <div class="pc-v3 pc-popular" id="pc-pro" onclick="selectPlan('pro', this)">
-      <div class="pc-badge">&#11088; Recommandé</div>
+    <div class="pc-v3 pc-popular">
+      <div class="pc-badge">⭐ Populaire</div>
       <div class="pc-name">Pro</div>
+      <div class="pc-amount">5 000 FCFA</div>
+      <div class="pc-period">par mois · Wave / Orange Money</div>
       <ul class="pc-features">
         <li class="pc-feat-item">
-          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Tout du plan Gratuit</span></div>
+          <div class="pc-feat-top"><span class="pc-check">✓</span><span class="pc-feat-name">Tout du plan Gratuit</span></div>
           <p class="pc-feat-desc">Toutes les fonctionnalités gratuites incluses, plus les suivantes.</p>
         </li>
         <li class="pc-feat-item">
-          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Dashboard analytics complet</span></div>
+          <div class="pc-feat-top"><span class="pc-check">✓</span><span class="pc-feat-name">Dashboard analytics complet</span></div>
           <p class="pc-feat-desc">Nombre de vues, clics WhatsApp, appareils utilisés et sources de trafic.</p>
         </li>
         <li class="pc-feat-item">
-          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Stats par pays et ville</span></div>
+          <div class="pc-feat-top"><span class="pc-check">✓</span><span class="pc-feat-name">Stats par pays et ville</span></div>
           <p class="pc-feat-desc">Vois les pays et villes de tes visiteurs pour mieux comprendre ton audience.</p>
         </li>
         <li class="pc-feat-item">
-          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Personnalisation couleurs</span></div>
+          <div class="pc-feat-top"><span class="pc-check">✓</span><span class="pc-feat-name">Personnalisation couleurs</span></div>
           <p class="pc-feat-desc">Choisis ta couleur principale et ton thème pour une carte 100% à tes couleurs.</p>
         </li>
         <li class="pc-feat-item">
-          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Support prioritaire WhatsApp</span></div>
+          <div class="pc-feat-top"><span class="pc-check">✓</span><span class="pc-feat-name">Support prioritaire WhatsApp</span></div>
           <p class="pc-feat-desc">Accès prioritaire au support via WhatsApp.</p>
         </li>
       </ul>
-      <button class="pc-btn" onclick="event.stopPropagation();selectPlan('pro',document.getElementById('pc-pro'));document.getElementById('creer').scrollIntoView({behavior:'smooth'})">Choisir le plan Pro</button>
-      <p class="pc-price-hint">Prix affiché lors de la génération</p>
+      <a href="#creer" class="pc-btn">Choisir le plan Pro</a>
     </div>
 
-    <!-- A VIE -->
-    <div class="pc-v3" id="pc-lifetime" onclick="selectPlan('lifetime', this)">
-      <div class="pc-badge pc-badge-lifetime">&#128293; Offre lancement</div>
-      <div class="pc-name">A vie</div>
+    <!-- À VIE -->
+    <div class="pc-v3">
+      <div class="pc-name">À vie</div>
+      <div class="pc-amount">25 000 FCFA</div>
+      <div class="pc-period">paiement unique · une fois pour toujours</div>
       <ul class="pc-features">
         <li class="pc-feat-item">
-          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Tout du plan Pro</span></div>
-          <p class="pc-feat-desc">Analytics, personnalisation, support &#8212; tout est inclus sans limite de durée.</p>
+          <div class="pc-feat-top"><span class="pc-check">✓</span><span class="pc-feat-name">Tout du plan Pro</span></div>
+          <p class="pc-feat-desc">Analytics, personnalisation, support — tout est inclus sans limite de durée.</p>
         </li>
         <li class="pc-feat-item">
-          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Accès à vie garanti</span></div>
+          <div class="pc-feat-top"><span class="pc-check">✓</span><span class="pc-feat-name">Accès à vie garanti</span></div>
           <p class="pc-feat-desc">Tu paies une seule fois. Aucun abonnement, aucune surprise, ta carte reste active à vie.</p>
         </li>
         <li class="pc-feat-item">
-          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Mises à jour incluses</span></div>
+          <div class="pc-feat-top"><span class="pc-check">✓</span><span class="pc-feat-name">Mises à jour incluses</span></div>
           <p class="pc-feat-desc">Toutes les nouvelles fonctionnalités futures sont automatiquement incluses dans ton plan.</p>
         </li>
         <li class="pc-feat-item">
-          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Multi-cartes (bientôt)</span></div>
-          <p class="pc-feat-desc">Fonctionnalité en cours de développement &#8212; disponible prochainement.</p>
+          <div class="pc-feat-top"><span class="pc-check">✓</span><span class="pc-feat-name">Multi-cartes (bientôt)</span></div>
+          <p class="pc-feat-desc">Fonctionnalité en cours de développement — disponible prochainement.</p>
         </li>
       </ul>
-      <button class="pc-btn" onclick="event.stopPropagation();selectPlan('lifetime',document.getElementById('pc-lifetime'));document.getElementById('creer').scrollIntoView({behavior:'smooth'})">Payer une fois, garder toujours</button>
-      <p class="pc-price-hint">Prix affiché lors de la génération</p>
+      <a href="#creer" class="pc-btn">Payer une fois, garder toujours</a>
     </div>
 
   </div>
 </section>
-
-<!-- ─── MODAL PAIEMENT ─── -->
-<div id="modal-paiement" role="dialog" aria-modal="true">
-  <div class="modal-card">
-    <button class="modal-close" onclick="fermerModalPaiement()" aria-label="Fermer">&#10005;</button>
-    <div class="modal-title">Paiement bientôt disponible</div>
-    <div class="modal-price-line" id="modal-prix-ligne">1 500 FCFA/mois</div>
-    <p class="modal-subtitle">Nous intégrons les paiements Wave et Orange Money prochainement.<br>En attendant, vous pouvez continuer en mode test.</p>
-    <button class="modal-btn modal-btn-disabled" disabled>Paiement via Wave (bientôt)</button>
-    <button class="modal-btn modal-btn-disabled" disabled>Paiement via Orange Money (bientôt)</button>
-    <button class="modal-btn modal-btn-continue" onclick="continuerDepuisModal()">Continuer (mode test)</button>
-  </div>
-</div>
 
 <!-- ─── FOOTER ─── -->
 <footer>
@@ -1577,44 +1484,9 @@
   // ══════════════════════════════════════════
   // 4. SOUMISSION DU FORMULAIRE
   // ══════════════════════════════════════════
-  // ── PLAN SELECTION ────────────────────────────────────────────────────────
-  var selectedPlan = 'free';
-
-  function selectPlan(plan, cardEl) {
-    selectedPlan = plan;
-    document.querySelectorAll('.pc-v3').forEach(function(c) { c.classList.remove('pc-selected'); });
-    cardEl.classList.add('pc-selected');
-  }
-
-  function ouvrirModalPaiement() {
-    var prix = selectedPlan === 'lifetime' ? '10 000 FCFA (paiement unique)' : '1 500 FCFA / mois';
-    document.getElementById('modal-prix-ligne').textContent = prix;
-    document.getElementById('modal-paiement').classList.add('open');
-  }
-
-  function fermerModalPaiement() {
-    document.getElementById('modal-paiement').classList.remove('open');
-  }
-
-  function continuerDepuisModal() {
-    fermerModalPaiement();
-    lancerCreationCarte();
-  }
-
-  document.getElementById('modal-paiement').addEventListener('click', function(e) {
-    if (e.target === this) fermerModalPaiement();
-  });
-
-    document.getElementById('carte-form').addEventListener('submit', async (e) => {
+  document.getElementById('carte-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (selectedPlan !== 'free') {
-      ouvrirModalPaiement();
-      return;
-    }
-    lancerCreationCarte();
-  });
 
-  async function lancerCreationCarte() {
     const btn   = document.getElementById('btn-submit');
     const alert = document.getElementById('form-alert');
     alert.className = '';
@@ -1648,9 +1520,11 @@
     if (!firebaseReady) {
       alert.className = 'success';
       alert.style.display = 'block';
-      alert.innerHTML = "🎉 <strong>Mode démo</strong> &#8212; Carte créée avec succès !<br/>"
-        + "<small>Configure Firebase pour activer la sauvegarde réelle.</small><br/>"
-        + "<span class='alert-url'>carteviz.com/" + slug + "</span>";
+      alert.innerHTML = `
+        🎉 <strong>Mode démo</strong> — Carte créée avec succès !<br/>
+        <small>Configure Firebase pour activer la sauvegarde réelle.</small><br/>
+        <span class="alert-url">carteviz.com/${slug}</span>
+      `;
       return;
     }
 
@@ -1724,12 +1598,12 @@
     } catch (err) {
       alert.className = 'error';
       alert.style.display = 'block';
-      alert.textContent = "&#10060; " + err.message;
+      alert.textContent = `❌ ${err.message}`;
     } finally {
       btn.classList.remove('loading');
       btn.disabled = false;
     }
-  }
+  });
 
 
   // ── SERVICES PAR SECTEUR (version africaine) ─────────────────────────────
