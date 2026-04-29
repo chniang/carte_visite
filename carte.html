@@ -869,7 +869,7 @@ async function loadCarte() {
     }
 
     // Vues
-    const vues = (d.vues||0) + 1;
+    const vues = d.vues || 0;
     document.getElementById('vues-count').textContent = vues;
     document.getElementById('vues-s').textContent = vues > 1 ? 's' : '';
 
@@ -1162,7 +1162,7 @@ async function loadDashboard() {
     // Récupérer les visites (sans orderBy pour éviter l'index composé)
     const visitesSnap = await db.collection('visites')
       .where('slug', '==', slug)
-      .limit(100)
+      .limit(500)
       .get();
 
     const visites = visitesSnap.docs
