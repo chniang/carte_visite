@@ -1041,7 +1041,7 @@ function openServiceModal(serviceName) {
 
   const owner = new URLSearchParams(window.location.search).get('owner');
   const validOwner = owner && d.owner_token && owner === d.owner_token;
-  if (!isActive || !validOwner) return; // Modal uniquement si Pro + bon token
+  if (!isActive) return; // Modal visible par tous si plan Pro actif
 
   const desc = getServiceDescription(serviceName, d.services_descriptions);
   const tel = d.tel ? normalizeWA(d.tel) : '';

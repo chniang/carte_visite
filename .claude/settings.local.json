@@ -6,7 +6,10 @@
       "Bash(python C:UsersLenovoDownloadspatch_index_prix.py)",
       "Bash(python \"C:\\\\Users\\\\Lenovo\\\\Downloads\\\\patch_pricing_modal.py\")",
       "mcp__ide__getDiagnostics",
-      "Bash(python *)"
+      "Bash(python *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
