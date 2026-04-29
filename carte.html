@@ -768,7 +768,7 @@ async function getCountry() {
   try {
     const r = await fetch('https://ipapi.co/json/');
     const d = await r.json();
-    const geo = { country: d.country_name || 'Inconnu', city: d.city || '', flag: d.country_code || '' };
+    const geo = { country: d.country_name || 'Inconnu', city: d.city || '', region: d.region || '', flag: d.country_code || '' };
     sessionStorage.setItem('carteviz_geo', JSON.stringify(geo));
     return geo;
   } catch {
@@ -1174,6 +1174,13 @@ async function loadDashboard() {
       });
 
     document.getElementById('d-vues').textContent = visites.length;
+    // Sync badge vues avec visites reelles
+    const vuesBadge = document.getElementById('vues-count');
+    if (vuesBadge) {
+      vuesBadge.textContent = visites.length;
+      const vuess = document.getElementById('vues-s');
+      if (vuess) vuess.textContent = visites.length > 1 ? 's' : '';
+    }
 
     if (visites.length === 0) {
       ['d-devices','d-sources','d-countries','d-recent'].forEach(id => {
