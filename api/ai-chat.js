@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -16,29 +15,30 @@ ${context || ""}
 Reponds en francais, de facon concise et actionnable. Max 4 phrases. Base-toi uniquement sur les donnees fournies. Utilise des chiffres precis quand disponibles. Sois direct et pratique.`;
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01"
+        "Authorization": "Bearer " + process.env.GROQ_API_KEY
       },
       body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
+        model: "llama3-8b-8192",
         max_tokens: 400,
-        system: systemPrompt,
-        messages: [{ role: "user", content: question }]
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: question }
+        ]
       })
     });
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("Anthropic error:", err);
+      console.error("Groq error:", err);
       return res.status(500).json({ error: "Erreur API IA" });
     }
 
     const data = await response.json();
-    const reply = data.content?.[0]?.text || "Pas de reponse";
+    const reply = data.choices?.[0]?.message?.content || "Pas de reponse";
     return res.status(200).json({ reply });
 
   } catch (err) {
