@@ -98,6 +98,9 @@
 
     .quick-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:.7rem;padding:.35rem .8rem;border-radius:6px;cursor:pointer;transition:all .2s}
     .quick-btn:hover{border-color:rgba(0,255,136,0.3);color:var(--accent)}
+
+    .kpi-spark svg { opacity: .7; }
+    .kpi-spark { margin-top: .4rem; }
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
     .pulse{animation:pulse 2s infinite;display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:.4rem}
   </style>
@@ -134,12 +137,12 @@
       <button class="refresh-btn" id="refresh-btn">&#8635; Actualiser</button>
     </div>
     <div class="kpi-grid" id="kpi-grid">
-      <div class="kpi"><div class="kpi-icon">📇</div><div class="kpi-val" id="k-total">—</div><div class="kpi-label">Total cartes</div></div>
+      <div class="kpi"><div class="kpi-icon">📇</div><div class="kpi-val" id="k-total">—</div><div class="kpi-label">Total cartes</div><div id="spark-cartes"></div></div>
       <div class="kpi"><div class="kpi-icon">⭐</div><div class="kpi-val" id="k-pro" style="color:var(--accent)">—</div><div class="kpi-label">Plan Pro</div><div class="kpi-sub">2 500 FCFA/mois</div></div>
       <div class="kpi"><div class="kpi-icon">♾️</div><div class="kpi-val" id="k-life" style="color:var(--accent2)">—</div><div class="kpi-label">A vie</div><div class="kpi-sub">15 000 FCFA</div></div>
       <div class="kpi"><div class="kpi-icon">🆓</div><div class="kpi-val" id="k-free">—</div><div class="kpi-label">Gratuit</div></div>
-      <div class="kpi"><div class="kpi-icon">💰</div><div class="kpi-val" id="k-rev" style="color:var(--accent);font-size:1.3rem">—</div><div class="kpi-label">Revenus cumules</div><div class="kpi-sub" id="k-mrr-sub">MRR: —</div></div>
-      <div class="kpi"><div class="kpi-icon">👁️</div><div class="kpi-val" id="k-vues">—</div><div class="kpi-label">Total vues</div><div class="kpi-sub" id="k-moy-sub">— moy/carte</div></div>
+      <div class="kpi"><div class="kpi-icon">💰</div><div class="kpi-val" id="k-rev" style="color:var(--accent);font-size:1.3rem">—</div><div class="kpi-label">Revenus cumules</div><div id="spark-rev"></div><div class="kpi-sub" id="k-mrr-sub">MRR: —</div></div>
+      <div class="kpi"><div class="kpi-icon">👁️</div><div class="kpi-val" id="k-vues">—</div><div class="kpi-label">Total vues</div><div id="spark-vues"></div><div class="kpi-sub" id="k-moy-sub">— moy/carte</div></div>
     </div>
 
     <!-- REVENUS + REPARTITION -->
@@ -262,11 +265,12 @@
       var vuesParSlug = {};
       visites.forEach(function(v){ if(v.slug) vuesParSlug[v.slug] = (vuesParSlug[v.slug]||0)+1; });
       cartes = cartes.map(function(c){ return Object.assign(c, {vues: vuesParSlug[c.slug||c.id]||0}); });
-      render(cartes);
+      render(cartes, visites);
     }).catch(function(e){ console.error(e); });
   }
 
-  function render(cartes) {
+  function render(cartes, visites) {
+    visites = visites || [];
     var total = cartes.length;
     var pro = cartes.filter(function(c){ return c.plan === 'pro'; }).length;
     var life = cartes.filter(function(c){ return c.plan === 'lifetime'; }).length;
@@ -310,6 +314,8 @@
       ? top.map(function(s,i){ return '<span class="tag'+(i<3?' hot':'')+'">'+s+'</span>'; }).join('')
       : '<span style="color:var(--muted);font-size:.8rem">Aucune donnee</span>';
 
+    buildSparkData(cartes, visites);
+
     // Table
     var sorted = cartes.slice().sort(function(a,b){ return (b.createdAt&&b.createdAt.seconds||0)-(a.createdAt&&a.createdAt.seconds||0); }).slice(0,20);
     if (!sorted.length) {
@@ -331,6 +337,68 @@
         +'<td><a href="'+BASE+(c.slug||'')+'" target="_blank" style="color:var(--accent);font-family:var(--mono);font-size:.7rem;text-decoration:none">VOIR →</a></td>'
         +'</tr>';
     }).join('');
+  }
+
+
+  function sparkline(id, values, color) {
+    var el = document.getElementById(id);
+    if (!el || values.length < 2) return;
+    var w = 90, h = 26;
+    var min = Math.min.apply(null, values);
+    var max = Math.max.apply(null, values);
+    var range = max - min || 1;
+    var pts = values.map(function(v, i) {
+      var x = (i / (values.length - 1)) * w;
+      var y = h - ((v - min) / range) * (h - 4) - 2;
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    }).join(' ');
+    el.className = 'kpi-spark';
+    el.innerHTML = '<svg width="'+w+'" height="'+h+'" style="display:block"><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="'+((values.length-1)/(values.length-1)*w).toFixed(1)+'" cy="'+(h - ((values[values.length-1]-min)/range)*(h-4) - 2).toFixed(1)+'" r="2.5" fill="'+color+'"/></svg>';
+  }
+
+  function buildSparkData(cartes, visites) {
+    var now = Date.now();
+    var day = 86400000;
+    // Vues par jour sur 7 jours
+    var vuesData = [];
+    for (var i = 6; i >= 0; i--) {
+      var start = now - (i+1)*day;
+      var end = now - i*day;
+      var count = visites.filter(function(v) {
+        var ts = v.timestamp && v.timestamp.seconds ? v.timestamp.seconds*1000 : 0;
+        return ts >= start && ts < end;
+      }).length;
+      vuesData.push(count);
+    }
+    // Cartes cumulees par semaine sur 4 semaines
+    var cartesData = [];
+    for (var j = 3; j >= 0; j--) {
+      var wstart = now - (j+1)*7*day;
+      var wend = now - j*7*day;
+      var cnt = cartes.filter(function(c) {
+        var ts = c.createdAt && c.createdAt.seconds ? c.createdAt.seconds*1000 : 0;
+        return ts >= wstart && ts < wend;
+      }).length;
+      cartesData.push(cnt);
+    }
+    // Revenus cumules par semaine
+    var revData = [];
+    var cumul = 0;
+    for (var k = 3; k >= 0; k--) {
+      var rs = now - (k+1)*7*day;
+      var re = now - k*7*day;
+      cartes.forEach(function(c) {
+        var ts = c.createdAt && c.createdAt.seconds ? c.createdAt.seconds*1000 : 0;
+        if (ts >= rs && ts < re) {
+          if (c.plan === 'pro') cumul += 2500;
+          if (c.plan === 'lifetime') cumul += 15000;
+        }
+      });
+      revData.push(cumul);
+    }
+    sparkline('spark-vues', vuesData, '#00ff88');
+    sparkline('spark-cartes', cartesData, '#a78bfa');
+    sparkline('spark-rev', revData, '#00d4ff');
   }
 
   window.buildContext = function() {
