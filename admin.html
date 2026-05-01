@@ -326,7 +326,7 @@
     }).join('');
   }
 
-  function buildContext() {
+  window.buildContext = function() {
     var total = document.getElementById('k-total').textContent;
     var pro = document.getElementById('k-pro') ? document.getElementById('k-pro').textContent : '?';
     var life = document.getElementById('k-life').textContent;
@@ -338,7 +338,7 @@
     return 'KPIs CarteViz:\n- Total cartes: '+total+'\n- Pro: '+pro+'\n- A vie: '+life+'\n- Gratuit: '+free+'\n- Revenus: '+rev+'\n- MRR: '+mrr+'\n- Vues: '+vues+'\n- Top services: '+(tags||'aucun');
   }
 
-  function askIA(question) {
+  window.askIA = function(question) {
     var input = document.getElementById('ia-input');
     var q = question || input.value.trim();
     if (!q) return;
