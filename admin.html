@@ -170,7 +170,7 @@
       <table>
         <thead>
           <tr>
-            <th>Nom</th><th>Titre</th><th>Services</th><th>Plan</th><th>Vues</th><th>Cree le</th><th>Lien</th><th>Action</th>
+            <th>Nom</th><th>Titre</th><th>Services</th><th>Plan</th><th>Vues</th><th>Cree le</th><th>Lien owner</th><th>Action</th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
@@ -335,7 +335,7 @@
         +'<td style="font-family:var(--mono)">'+(c.vues||0)+'</td>'
         +'<td style="color:var(--muted);font-size:.78rem">'+date+'</td>'
         +'<td>'+(c.plan==='free'||!c.plan ? '<button onclick="activerPlan(\''+( c.slug||c.id)+'\',\'pro\')" style="background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.3);color:var(--accent);font-family:var(--mono);font-size:.62rem;padding:.2rem .5rem;border-radius:4px;cursor:pointer;margin-right:.3rem">Pro</button><button onclick="activerPlan(\''+( c.slug||c.id)+'\',\'lifetime\')" style="background:rgba(0,212,255,0.15);border:1px solid rgba(0,212,255,0.3);color:var(--accent2);font-family:var(--mono);font-size:.62rem;padding:.2rem .5rem;border-radius:4px;cursor:pointer">A vie</button>' : '<span style="color:var(--muted);font-size:.72rem">Actif</span>')+'</td>'
-        +'<td><a href="'+BASE+(c.slug||'')+'" target="_blank" style="color:var(--accent);font-family:var(--mono);font-size:.7rem;text-decoration:none">VOIR →</a></td>'
+        +'<td>'+(c.owner_token ? '<span style="font-family:var(--mono);font-size:.65rem;color:var(--muted);cursor:pointer" onclick="copyOwner(\''+( c.slug||c.id)+'\',\''+c.owner_token+'\')" title="Cliquer pour copier">&#128279; Copier lien</span>' : '<span style="color:var(--muted);font-size:.65rem">—</span>')+'</td>'
         +'</tr>';
     }).join('');
   }
@@ -402,6 +402,16 @@
     sparkline('spark-rev', revData, '#00d4ff');
   }
 
+
+
+  window.copyOwner = function(slug, token) {
+    var url = 'https://chniang.github.io/carte_visite/carte.html?slug=' + slug + '&owner=' + token;
+    navigator.clipboard.writeText(url).then(function(){
+      alert('Lien owner copie : ' + url);
+    }).catch(function(){
+      prompt('Copie ce lien owner :', url);
+    });
+  };
 
   window.activerPlan = function(slug, plan) {
     if (!confirm('Activer plan ' + plan + ' pour ' + slug + ' ?')) return;
