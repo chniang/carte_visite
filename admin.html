@@ -253,8 +253,15 @@
 
   function loadData() {
     if (!db) { alert('Firebase non connecte'); return; }
-    db.collection('cartes').get().then(function(snap) {
-      var cartes = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    Promise.all([
+      db.collection('cartes').get(),
+      db.collection('visites').get()
+    ]).then(function(results) {
+      var cartes = results[0].docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      var visites = results[1].docs.map(function(d){ return d.data(); });
+      var vuesParSlug = {};
+      visites.forEach(function(v){ if(v.slug) vuesParSlug[v.slug] = (vuesParSlug[v.slug]||0)+1; });
+      cartes = cartes.map(function(c){ return Object.assign(c, {vues: vuesParSlug[c.slug||c.id]||0}); });
       render(cartes);
     }).catch(function(e){ console.error(e); });
   }
