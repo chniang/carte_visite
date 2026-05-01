@@ -794,6 +794,18 @@ async function recordVisit(slug) {
   }
 }
 
+
+function shareWA() {
+  var url = encodeURIComponent(window.location.origin + window.location.pathname + '?slug=' + (window._slug || getSlug()));
+  var msg = encodeURIComponent("Voici ma carte de visite numerique CarteViz : ");
+  window.open('https://wa.me/?text=' + msg + url, '_blank');
+}
+
+function shareFB() {
+  var url = encodeURIComponent(window.location.origin + window.location.pathname + '?slug=' + (window._slug || getSlug()));
+  window.open('https://www.facebook.com/sharer/sharer.php?u=' + url, '_blank');
+}
+
 function showError(msg) {
   document.getElementById('loading').style.display = 'none';
   const ep = document.getElementById('error-page');
