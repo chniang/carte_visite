@@ -8,11 +8,7 @@ export default async function handler(req, res) {
   const { question, context } = req.body;
   if (!question) return res.status(400).json({ error: "question required" });
 
-  const systemPrompt = `Tu es l'assistant analytique de CarteViz, un SaaS de cartes de visite numeriques pour le marche senegalais et africain.
-
-${context || ""}
-
-Reponds en francais, de facon concise et actionnable. Max 4 phrases. Base-toi uniquement sur les donnees fournies. Utilise des chiffres precis quand disponibles. Sois direct et pratique.`;
+  const systemPrompt = "Tu es l'assistant analytique de CarteViz. " + (context || "") + " Reponds en francais, max 4 phrases.";
 
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -22,7 +18,7 @@ Reponds en francais, de facon concise et actionnable. Max 4 phrases. Base-toi un
         "Authorization": "Bearer " + process.env.GROQ_API_KEY
       },
       body: JSON.stringify({
-        model: "llama3-8b-8192",
+        model: "llama-3.3-70b-versatile",
         max_tokens: 400,
         messages: [
           { role: "system", content: systemPrompt },
@@ -31,18 +27,18 @@ Reponds en francais, de facon concise et actionnable. Max 4 phrases. Base-toi un
       })
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const err = await response.text();
-      console.error("Groq error:", err);
-      return res.status(500).json({ error: "Erreur API IA" });
+      console.error("Groq error FULL:", JSON.stringify(data));
+      return res.status(500).json({ error: "Erreur API IA", detail: JSON.stringify(data) });
     }
 
-    const data = await response.json();
     const reply = data.choices?.[0]?.message?.content || "Pas de reponse";
     return res.status(200).json({ reply });
 
   } catch (err) {
-    console.error("Handler error:", err);
-    return res.status(500).json({ error: "Erreur serveur" });
+    console.error("Handler error:", err.message);
+    return res.status(500).json({ error: "Erreur serveur", detail: err.message });
   }
 }
