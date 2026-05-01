@@ -897,6 +897,9 @@ async function loadCarte() {
     const vues = d.vues || 0;
     document.getElementById('vues-count').textContent = vues;
     document.getElementById('vues-s').textContent = vues > 1 ? 's' : '';
+    // Cacher le badge vues si pas owner
+    const isOwnerView = new URLSearchParams(window.location.search).get('owner');
+    if (!isOwnerView) { const vb = document.querySelector('.vues-badge'); if(vb) vb.style.display='none'; }
 
     // Contacts
     const contacts = [];
