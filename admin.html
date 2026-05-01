@@ -170,7 +170,7 @@
       <table>
         <thead>
           <tr>
-            <th>Nom</th><th>Titre</th><th>Services</th><th>Plan</th><th>Vues</th><th>Cree le</th><th>Lien</th>
+            <th>Nom</th><th>Titre</th><th>Services</th><th>Plan</th><th>Vues</th><th>Cree le</th><th>Lien</th><th>Action</th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
@@ -334,6 +334,7 @@
         +'<td><span class="badge '+bc+'">'+bl+'</span></td>'
         +'<td style="font-family:var(--mono)">'+(c.vues||0)+'</td>'
         +'<td style="color:var(--muted);font-size:.78rem">'+date+'</td>'
+        +'<td>'+(c.plan==='free'||!c.plan ? '<button onclick="activerPlan(\''+( c.slug||c.id)+'\',\'pro\')" style="background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.3);color:var(--accent);font-family:var(--mono);font-size:.62rem;padding:.2rem .5rem;border-radius:4px;cursor:pointer;margin-right:.3rem">Pro</button><button onclick="activerPlan(\''+( c.slug||c.id)+'\',\'lifetime\')" style="background:rgba(0,212,255,0.15);border:1px solid rgba(0,212,255,0.3);color:var(--accent2);font-family:var(--mono);font-size:.62rem;padding:.2rem .5rem;border-radius:4px;cursor:pointer">A vie</button>' : '<span style="color:var(--muted);font-size:.72rem">Actif</span>')+'</td>'
         +'<td><a href="'+BASE+(c.slug||'')+'" target="_blank" style="color:var(--accent);font-family:var(--mono);font-size:.7rem;text-decoration:none">VOIR →</a></td>'
         +'</tr>';
     }).join('');
@@ -400,6 +401,26 @@
     sparkline('spark-cartes', cartesData, '#a78bfa');
     sparkline('spark-rev', revData, '#00d4ff');
   }
+
+
+  window.activerPlan = function(slug, plan) {
+    if (!confirm('Activer plan ' + plan + ' pour ' + slug + ' ?')) return;
+    fetch('https://carteviz-backend.vercel.app/api/activate-plan', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({slug: slug, plan: plan, admin_token: 'carteviz_admin_2025'})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if (data.success) {
+        alert('Plan ' + plan + ' active pour ' + slug);
+        loadData();
+      } else {
+        alert('Erreur : ' + (data.error || 'inconnue'));
+      }
+    })
+    .catch(function(){ alert('Erreur de connexion'); });
+  };
 
   window.buildContext = function() {
     var total = document.getElementById('k-total').textContent;
