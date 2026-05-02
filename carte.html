@@ -1014,13 +1014,12 @@ async function loadCarte() {
       btnWa.addEventListener('click', function(e) {
         e.preventDefault();
         var href = btnWa.href;
-        db.collection('cartes').doc(slug).update({
-          clics_whatsapp: firebase.firestore.FieldValue.increment(1)
-        }).then(function(){
-          window.open(href, '_blank');
-        }).catch(function(){
-          window.open(href, '_blank');
-        });
+        db.collection('visites').add({
+          slug: slug,
+          type: 'whatsapp_click',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(function(){});
+        setTimeout(function(){ window.location.href = href; }, 200);
       });
     } else {
       document.getElementById('btn-wa').style.display = 'none';
