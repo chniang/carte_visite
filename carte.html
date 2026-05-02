@@ -785,7 +785,7 @@ async function getCountry() {
   const cached = sessionStorage.getItem('carteviz_geo');
   if (cached) return JSON.parse(cached);
   try {
-    const r = await fetch('http://ip-api.com/json/?fields=country,regionName,city,countryCode');
+    const r = await fetch('https://ip-api.com/json/?fields=country,regionName,city,countryCode');
     const d = await r.json();
     const geo = { country: d.country || 'Inconnu', city: d.city || '', region: d.regionName || '', flag: d.countryCode || '' };
     sessionStorage.setItem('carteviz_geo', JSON.stringify(geo));
