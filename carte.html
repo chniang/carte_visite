@@ -2,6 +2,12 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="CarteViz" />
+  <meta property="og:title" content="Carte de visite numerique - CarteViz" />
+  <meta property="og:description" content="Decouvrez ma carte de visite numerique sur CarteViz" />
+  <meta property="og:image" content="https://chniang.github.io/carte_visite/images/carte_visite.png" />
+  <meta name="twitter:card" content="summary_large_image" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CarteViz — Carte de visite</title>
 
@@ -832,6 +838,24 @@ function shareFB() {
   }
 })();
 
+
+// Mise a jour balises Open Graph dynamiques
+function updateOGTags(d) {
+  var title = (d.prenom || '') + ' ' + (d.nom || '') + ' - ' + (d.titre || 'CarteViz');
+  var desc = d.bio || ('Carte de visite de ' + (d.prenom||'') + ' ' + (d.nom||'') + ' sur CarteViz');
+  var img = d.photo || 'https://chniang.github.io/carte_visite/images/carte_visite.png';
+  var url = window.location.href;
+  var setMeta = function(prop, val) {
+    var el = document.querySelector('meta[property="'+prop+'"]');
+    if (el) el.setAttribute('content', val);
+  };
+  setMeta('og:title', title);
+  setMeta('og:description', desc.substring(0, 200));
+  setMeta('og:image', img);
+  setMeta('og:url', url);
+  document.title = title + ' | CarteViz';
+}
+
 function showError(msg) {
   document.getElementById('loading').style.display = 'none';
   const ep = document.getElementById('error-page');
@@ -865,6 +889,7 @@ async function loadCarte() {
       }
     }
       window._carteData = d;
+      updateOGTags(d);
       setupUpgradeBanner(d);
       // Appliquer thème pour tous les visiteurs
       if (d.theme_color) loadTheme(d.theme_color);
