@@ -1272,7 +1272,7 @@ async function loadDashboard() {
     }
 
     if (visites.length === 0) {
-      ['d-devices','d-sources','d-countries','d-recent'].forEach(id => {
+      ['d-devices','d-sources','d-taux','d-top-services','d-recent'].forEach(id => {
         document.getElementById(id).innerHTML = '<div class="empty-state">Aucune visite enregistrée encore</div>';
       });
       return;
@@ -1309,7 +1309,7 @@ async function loadDashboard() {
   } catch(err) {
     console.error('Dashboard error:', err.message, err);
     const errMsg = '<div class="empty-state">Erreur: ' + err.message + '</div>';
-    ['d-devices','d-sources','d-countries','d-recent'].forEach(id => {
+    ['d-devices','d-sources','d-taux','d-top-services','d-recent'].forEach(id => {
       const el = document.getElementById(id);
       if (el && el.innerHTML.includes('Chargement')) el.innerHTML = errMsg;
     });
