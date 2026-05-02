@@ -823,9 +823,13 @@ function shareWA() {
 function shareFB() {
   var slug = window._slug || getSlug();
   var d = window._carteData || {};
-  var url = encodeURIComponent(window.location.origin + window.location.pathname + '?slug=' + slug);
-  var quote = encodeURIComponent('Decouvrez la carte de visite numerique de ' + (d.prenom||'') + ' ' + (d.nom||'') + ' sur CarteViz !');
-  window.open('https://www.facebook.com/sharer/sharer.php?u=' + url + '&quote=' + quote, '_blank');
+  var url = window.location.origin + window.location.pathname + '?slug=' + slug;
+  var text = 'Decouvrez la carte de visite numerique de ' + (d.prenom||'') + ' ' + (d.nom||'') + ' sur CarteViz !';
+  if (navigator.share) {
+    navigator.share({ title: (d.prenom||'') + ' ' + (d.nom||'') + ' - CarteViz', text: text, url: url });
+  } else {
+    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), '_blank');
+  }
 }
 
 
