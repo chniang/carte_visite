@@ -1014,7 +1014,11 @@ async function loadCarte() {
       btnWa.addEventListener('click', () => {
         db.collection('cartes').doc(slug).update({
           clics_whatsapp: firebase.firestore.FieldValue.increment(1)
-        }).catch(()=>{});
+        }).then(function(){
+          console.log('clic WA enregistre');
+        }).catch(function(e){
+          console.error('erreur clic WA:', e.message);
+        });
       });
     } else {
       document.getElementById('btn-wa').style.display = 'none';
