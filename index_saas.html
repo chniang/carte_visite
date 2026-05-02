@@ -172,10 +172,15 @@
       overflow: hidden;
     }
 
-    .hero { position: relative; overflow: hidden; min-height: auto !important; padding-top: 5rem !important; padding-bottom: 3rem !important; }
-    #hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.6; }
-    .hero > *:not(#hero-canvas) { position: relative; z-index: 2; }
-    .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139,92,246,0.25) 0%, rgba(99,102,241,0.1) 40%, transparent 70%); z-index: 0; pointer-events: none; }
+    .hero { position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 100% 80% at 50% -10%, rgba(139,92,246,0.35) 0%, rgba(99,102,241,0.15) 40%, transparent 70%); pointer-events: none; animation: heroPulse 6s ease-in-out infinite; }
+    .hero-orb { position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none; animation: orbFloat 8s ease-in-out infinite; }
+    .hero-orb1 { width: 300px; height: 300px; background: rgba(139,92,246,0.2); top: -80px; right: 10%; animation-delay: 0s; }
+    .hero-orb2 { width: 200px; height: 200px; background: rgba(99,102,241,0.15); bottom: 0; left: 5%; animation-delay: -3s; }
+    .hero-orb3 { width: 150px; height: 150px; background: rgba(167,139,250,0.1); top: 30%; left: 30%; animation-delay: -5s; }
+    .hero > *:not(.hero-orb) { position: relative; z-index: 2; }
+    @keyframes heroPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+    @keyframes orbFloat { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-20px) scale(1.05); } }
     .hero-glow {
       position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
       width: 700px; height: 700px; border-radius: 50%;
@@ -746,10 +751,15 @@
 
     /* Gradient violet hero */
 
-    .hero { position: relative; overflow: hidden; min-height: auto !important; padding-top: 5rem !important; padding-bottom: 3rem !important; }
-    #hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.6; }
-    .hero > *:not(#hero-canvas) { position: relative; z-index: 2; }
-    .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139,92,246,0.25) 0%, rgba(99,102,241,0.1) 40%, transparent 70%); z-index: 0; pointer-events: none; }
+    .hero { position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 100% 80% at 50% -10%, rgba(139,92,246,0.35) 0%, rgba(99,102,241,0.15) 40%, transparent 70%); pointer-events: none; animation: heroPulse 6s ease-in-out infinite; }
+    .hero-orb { position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none; animation: orbFloat 8s ease-in-out infinite; }
+    .hero-orb1 { width: 300px; height: 300px; background: rgba(139,92,246,0.2); top: -80px; right: 10%; animation-delay: 0s; }
+    .hero-orb2 { width: 200px; height: 200px; background: rgba(99,102,241,0.15); bottom: 0; left: 5%; animation-delay: -3s; }
+    .hero-orb3 { width: 150px; height: 150px; background: rgba(167,139,250,0.1); top: 30%; left: 30%; animation-delay: -5s; }
+    .hero > *:not(.hero-orb) { position: relative; z-index: 2; }
+    @keyframes heroPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+    @keyframes orbFloat { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-20px) scale(1.05); } }
     .hero-glow {
       background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%) !important;
     }
@@ -1067,6 +1077,9 @@
 
 <!-- ─── HERO ─── -->
 <section class="hero">
+  <div class="hero-orb hero-orb1"></div>
+  <div class="hero-orb hero-orb2"></div>
+  <div class="hero-orb hero-orb3"></div>
   <div class="hero-glow"></div>
   <div class="hero-badge">
     <span class="badge-dot"></span>
@@ -2195,80 +2208,7 @@
   // Init preview
   updatePreview();
 
-// Animation hero canvas
-(function() {
-  var canvas = document.getElementById('hero-canvas');
-  if (!canvas) return;
-  var ctx = canvas.getContext('2d');
-  var cards = [];
-  var N = 18;
 
-  function resize() {
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-  }
-
-  function randomCard() {
-    return {
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      w: 60 + Math.random() * 40,
-      h: 38 + Math.random() * 24,
-      r: 6,
-      vx: (Math.random() - 0.5) * 0.4,
-      vy: (Math.random() - 0.5) * 0.3,
-      alpha: 0.04 + Math.random() * 0.1,
-      rot: (Math.random() - 0.5) * 0.3,
-      vrot: (Math.random() - 0.5) * 0.002
-    };
-  }
-
-  function roundRect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-  }
-
-  resize();
-  window.addEventListener('resize', function() { resize(); cards = []; for(var i=0;i<N;i++) cards.push(randomCard()); });
-  for (var i = 0; i < N; i++) cards.push(randomCard());
-
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    cards.forEach(function(c) {
-      ctx.save();
-      ctx.translate(c.x + c.w/2, c.y + c.h/2);
-      ctx.rotate(c.rot);
-      ctx.globalAlpha = c.alpha;
-      ctx.strokeStyle = 'rgba(167,139,250,0.6)';
-      ctx.lineWidth = 1;
-      roundRect(ctx, -c.w/2, -c.h/2, c.w, c.h, c.r);
-      ctx.stroke();
-      ctx.fillStyle = 'rgba(139,92,246,0.06)';
-      ctx.fill();
-      // Mini ligne simulant du texte
-      ctx.fillStyle = 'rgba(167,139,250,0.3)';
-      ctx.fillRect(-c.w/2+8, -c.h/2+8, c.w*0.5, 3);
-      ctx.fillRect(-c.w/2+8, -c.h/2+15, c.w*0.35, 2);
-      ctx.restore();
-      c.x += c.vx; c.y += c.vy; c.rot += c.vrot;
-      if (c.x < -c.w) c.x = canvas.width + c.w;
-      if (c.x > canvas.width + c.w) c.x = -c.w;
-      if (c.y < -c.h) c.y = canvas.height + c.h;
-      if (c.y > canvas.height + c.h) c.y = -c.h;
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
 </script>
 
 </body>
