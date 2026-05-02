@@ -1281,7 +1281,7 @@ async function loadDashboard() {
 
     // ── Visites récentes ──────────────────────────────────
     const recentEl = document.getElementById('d-recent');
-    const recent = visites.slice(0, 8);
+    const recent = visitesReelles.slice(0, 8);
     recentEl.innerHTML = recent.map(v => {
       const flag = v.country_code ? getFlagEmoji(v.country_code) : '🌐';
       const time = v.timestamp ? formatTime(v.timestamp.toDate()) : 'récemment';
