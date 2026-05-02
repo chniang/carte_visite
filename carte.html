@@ -1272,9 +1272,14 @@ async function loadDashboard() {
     }
 
     if (visites.length === 0) {
-      ['d-devices','d-sources','d-taux','d-top-services','d-recent'].forEach(id => {
-        document.getElementById(id).innerHTML = '<div class="empty-state">Aucune visite enregistrée encore</div>';
+      ['d-devices','d-sources','d-recent'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '<div class="empty-state">Aucune visite enregistrée encore</div>';
       });
+      const tauxEl = document.getElementById('d-taux');
+      if (tauxEl) tauxEl.textContent = '0%';
+      const topEl = document.getElementById('d-top-services');
+      if (topEl) topEl.innerHTML = '<div class="empty-state">Aucune donnée</div>';
       return;
     }
 
