@@ -819,6 +819,19 @@ function shareFB() {
   window.open('https://www.facebook.com/sharer/sharer.php?u=' + url, '_blank');
 }
 
+
+// Bouton retour si vient de la demo
+(function() {
+  var ref = new URLSearchParams(window.location.search).get('ref');
+  if (ref === 'demo') {
+    var btn = document.createElement('a');
+    btn.href = 'index_saas.html';
+    btn.innerHTML = '&#8592; Retour a CarteViz';
+    btn.style.cssText = 'position:fixed;top:16px;left:16px;z-index:999;background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.3);color:#a78bfa;padding:.5rem 1rem;border-radius:10px;font-size:.82rem;font-weight:600;text-decoration:none;backdrop-filter:blur(10px)';
+    document.body.appendChild(btn);
+  }
+})();
+
 function showError(msg) {
   document.getElementById('loading').style.display = 'none';
   const ep = document.getElementById('error-page');
