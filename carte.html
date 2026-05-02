@@ -1312,16 +1312,12 @@ async function loadDashboard() {
     if (recentEl) {
       const recent = visitesReelles.slice(0, 8);
       recentEl.innerHTML = recent.map(v => {
-        const flag = v.country_code ? getFlagEmoji(v.country_code) : '🌐';
         const time = v.timestamp ? formatTime(v.timestamp.toDate()) : 'récemment';
         const deviceIcon = v.device === 'Mobile' ? '📱' : '💻';
         return `<div class="visite-item">
           <div class="visite-left">
-            <span class="visite-flag">${flag}</span>
-            <div>
-              <div class="visite-info">${v.country || 'Inconnu'} ${v.region ? '· '+v.region : ''}</div>
-              <div class="visite-sub">${deviceIcon} ${v.device || '--'} · ${v.source || '--'}</div>
-            </div>
+            <span class="visite-flag">${deviceIcon}</span>
+            <div class="visite-info">${v.device || 'Inconnu'} · ${v.source || 'Direct'}</div>
           </div>
           <div class="visite-time">${time}</div>
         </div>`;
