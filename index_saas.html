@@ -172,15 +172,7 @@
       overflow: hidden;
     }
 
-    .hero { position: relative; overflow: hidden; }
-    .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 100% 80% at 50% -10%, rgba(139,92,246,0.35) 0%, rgba(99,102,241,0.15) 40%, transparent 70%); pointer-events: none; animation: heroPulse 6s ease-in-out infinite; }
-    .hero-orb { position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none; animation: orbFloat 8s ease-in-out infinite; }
-    .hero-orb1 { width: 300px; height: 300px; background: rgba(139,92,246,0.2); top: -80px; right: 10%; animation-delay: 0s; }
-    .hero-orb2 { width: 200px; height: 200px; background: rgba(99,102,241,0.15); bottom: 0; left: 5%; animation-delay: -3s; }
-    .hero-orb3 { width: 150px; height: 150px; background: rgba(167,139,250,0.1); top: 30%; left: 30%; animation-delay: -5s; }
-    .hero > *:not(.hero-orb) { position: relative; z-index: 2; }
-    @keyframes heroPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
-    @keyframes orbFloat { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-20px) scale(1.05); } }
+    
     .hero-glow {
       position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
       width: 700px; height: 700px; border-radius: 50%;
@@ -751,15 +743,7 @@
 
     /* Gradient violet hero */
 
-    .hero { position: relative; overflow: hidden; }
-    .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 100% 80% at 50% -10%, rgba(139,92,246,0.35) 0%, rgba(99,102,241,0.15) 40%, transparent 70%); pointer-events: none; animation: heroPulse 6s ease-in-out infinite; }
-    .hero-orb { position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none; animation: orbFloat 8s ease-in-out infinite; }
-    .hero-orb1 { width: 300px; height: 300px; background: rgba(139,92,246,0.2); top: -80px; right: 10%; animation-delay: 0s; }
-    .hero-orb2 { width: 200px; height: 200px; background: rgba(99,102,241,0.15); bottom: 0; left: 5%; animation-delay: -3s; }
-    .hero-orb3 { width: 150px; height: 150px; background: rgba(167,139,250,0.1); top: 30%; left: 30%; animation-delay: -5s; }
-    .hero > *:not(.hero-orb) { position: relative; z-index: 2; }
-    @keyframes heroPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
-    @keyframes orbFloat { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-20px) scale(1.05); } }
+    
     .hero-glow {
       background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%) !important;
     }
@@ -1077,9 +1061,6 @@
 
 <!-- ─── HERO ─── -->
 <section class="hero">
-  <div class="hero-orb hero-orb1"></div>
-  <div class="hero-orb hero-orb2"></div>
-  <div class="hero-orb hero-orb3"></div>
   <div class="hero-glow"></div>
   <div class="hero-badge">
     <span class="badge-dot"></span>
