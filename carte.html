@@ -1284,32 +1284,49 @@ async function loadDashboard() {
     }
 
     // ── Appareils ────────────────────────────────────────
-    renderBars('d-devices', countBy(visites, 'device'));
+    renderBars('d-devices', countBy(visitesReelles, 'device'));
 
     // ── Sources ──────────────────────────────────────────
-    renderBars('d-sources', countBy(visites, 'source'));
+    renderBars('d-sources', countBy(visitesReelles, 'source'));
 
-    // ── Pays ─────────────────────────────────────────────
-    renderBars('d-countries', countBy(visites, 'country'));
+    // ── Taux de conversion ────────────────────────────────
+    const tauxEl = document.getElementById('d-taux');
+    if (tauxEl) {
+      const taux = visitesReelles.length > 0 ? Math.round(clicsWA / visitesReelles.length * 100) : 0;
+      tauxEl.textContent = taux + '%';
+    }
+
+    // ── Top services ──────────────────────────────────────
+    const topEl = document.getElementById('d-top-services');
+    if (topEl) {
+      const services = (carteData && carteData.services) ? carteData.services : [];
+      if (services.length === 0) {
+        topEl.innerHTML = '<div class="empty-state">Aucun service renseigné</div>';
+      } else {
+        topEl.innerHTML = services.slice(0, 5).map(s => `<div class="bar-item"><span class="bar-label">${s}</span></div>`).join('');
+      }
+    }
 
     // ── Visites récentes ──────────────────────────────────
     const recentEl = document.getElementById('d-recent');
-    const recent = visitesReelles.slice(0, 8);
-    recentEl.innerHTML = recent.map(v => {
-      const flag = v.country_code ? getFlagEmoji(v.country_code) : '🌐';
-      const time = v.timestamp ? formatTime(v.timestamp.toDate()) : 'récemment';
-      const deviceIcon = v.device === 'Mobile' ? '📱' : '💻';
-      return `<div class="visite-item">
-        <div class="visite-left">
-          <span class="visite-flag">${flag}</span>
-          <div>
-            <div class="visite-info">${v.country || 'Inconnu'} ${v.region ? '· '+v.region : ''}</div>
-            <div class="visite-sub">${deviceIcon} ${v.device || '—'} · ${v.source || '—'}</div>
+    if (recentEl) {
+      const recent = visitesReelles.slice(0, 8);
+      recentEl.innerHTML = recent.map(v => {
+        const flag = v.country_code ? getFlagEmoji(v.country_code) : '🌐';
+        const time = v.timestamp ? formatTime(v.timestamp.toDate()) : 'récemment';
+        const deviceIcon = v.device === 'Mobile' ? '📱' : '💻';
+        return `<div class="visite-item">
+          <div class="visite-left">
+            <span class="visite-flag">${flag}</span>
+            <div>
+              <div class="visite-info">${v.country || 'Inconnu'} ${v.region ? '· '+v.region : ''}</div>
+              <div class="visite-sub">${deviceIcon} ${v.device || '--'} · ${v.source || '--'}</div>
+            </div>
           </div>
-        </div>
-        <div class="visite-time">${time}</div>
-      </div>`;
-    }).join('');
+          <div class="visite-time">${time}</div>
+        </div>`;
+      }).join('');
+    }
 
   } catch(err) {
     console.error('Dashboard error:', err.message, err);
@@ -1335,12 +1352,14 @@ function countBy(arr, key) {
 }
 
 function renderBars(containerId, entries) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
   if (!entries.length) {
-    document.getElementById(containerId).innerHTML = '<div class="empty-state">Aucune donnée</div>';
+    container.innerHTML = '<div class="empty-state">Aucune donnée</div>';
     return;
   }
   const max = entries[0][1];
-  document.getElementById(containerId).innerHTML = entries.slice(0,6).map(([label, count]) => `
+  container.innerHTML = entries.slice(0,6).map(([label, count]) => `
     <div class="bar-item">
       <span class="bar-label">${label}</span>
       <div class="bar-track">
