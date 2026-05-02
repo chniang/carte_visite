@@ -1314,12 +1314,14 @@ async function loadDashboard() {
   } catch(err) {
     console.error('Dashboard error:', err.message, err);
     const errMsg = '<div class="empty-state">Erreur: ' + err.message + '</div>';
-    ['d-devices','d-sources','d-taux','d-top-services','d-recent'].forEach(id => {
+    ['d-devices','d-sources','d-recent'].forEach(id => {
       const el = document.getElementById(id);
-      if (el && el.innerHTML.includes('Chargement')) el.innerHTML = errMsg;
+      if (el) el.innerHTML = errMsg;
     });
-    const recentEl = document.getElementById('d-recent');
-    if (recentEl) recentEl.innerHTML = errMsg;
+    const tauxErrEl = document.getElementById('d-taux');
+    if (tauxErrEl) tauxErrEl.textContent = '—';
+    const topErrEl = document.getElementById('d-top-services');
+    if (topErrEl) topErrEl.innerHTML = errMsg;
   }
 }
 
