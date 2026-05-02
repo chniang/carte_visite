@@ -1251,13 +1251,14 @@ async function loadDashboard() {
         return tb - ta;
       });
 
-    document.getElementById('d-vues').textContent = visites.length;
     const clicsWA = visites.filter(function(v){ return v.type === 'whatsapp_click'; }).length;
+    const visitesReelles = visites.filter(function(v){ return v.type !== 'whatsapp_click'; });
+    document.getElementById('d-vues').textContent = visitesReelles.length;
     document.getElementById('d-wa').textContent = clicsWA;
     // Sync badge vues avec visites reelles
     const vuesBadge = document.getElementById('vues-count');
     if (vuesBadge) {
-      vuesBadge.textContent = visites.length;
+      vuesBadge.textContent = visitesReelles.length;
       const vuess = document.getElementById('vues-s');
       if (vuess) vuess.textContent = visites.length > 1 ? 's' : '';
     }
