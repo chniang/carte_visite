@@ -1011,13 +1011,15 @@ async function loadCarte() {
       const waUrl = `https://wa.me/${normalizeWA(d.tel)}?text=${msg}`;
       const btnWa = document.getElementById('btn-wa');
       btnWa.href = waUrl;
-      btnWa.addEventListener('click', () => {
+      btnWa.addEventListener('click', function(e) {
+        e.preventDefault();
+        var href = btnWa.href;
         db.collection('cartes').doc(slug).update({
           clics_whatsapp: firebase.firestore.FieldValue.increment(1)
         }).then(function(){
-          console.log('clic WA enregistre');
-        }).catch(function(e){
-          console.error('erreur clic WA:', e.message);
+          window.open(href, '_blank');
+        }).catch(function(){
+          window.open(href, '_blank');
         });
       });
     } else {
