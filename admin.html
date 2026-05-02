@@ -263,19 +263,20 @@
       var cartes = results[0].docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
       var visites = results[1].docs.map(function(d){ return d.data(); });
       var vuesParSlug = {};
-      visites.forEach(function(v){ if(v.slug) vuesParSlug[v.slug] = (vuesParSlug[v.slug]||0)+1; });
+      visites.forEach(function(v){ if(v.slug && v.type !== 'whatsapp_click') vuesParSlug[v.slug] = (vuesParSlug[v.slug]||0)+1; });
       cartes = cartes.map(function(c){ return Object.assign(c, {vues: vuesParSlug[c.slug||c.id]||0}); });
-      render(cartes, visites);
+      render(cartes, visites, vuesParSlug);
     }).catch(function(e){ console.error(e); });
   }
 
-  function render(cartes, visites) {
+  function render(cartes, visites, vuesParSlug) {
     visites = visites || [];
+    vuesParSlug = vuesParSlug || {};
     var total = cartes.length;
     var pro = cartes.filter(function(c){ return c.plan === 'pro'; }).length;
     var life = cartes.filter(function(c){ return c.plan === 'lifetime'; }).length;
     var free = cartes.filter(function(c){ return !c.plan || c.plan === 'free'; }).length;
-    var vues = cartes.reduce(function(s,c){ return s+(c.vues||0); }, 0);
+    var vues = Object.values(vuesParSlug).reduce(function(s,n){ return s+n; }, 0);
     var mrr = pro * 2500;
     var ltv = life * 15000;
     var rev = mrr + ltv;
