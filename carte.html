@@ -821,8 +821,11 @@ function shareWA() {
 }
 
 function shareFB() {
-  var url = encodeURIComponent(window.location.origin + window.location.pathname + '?slug=' + (window._slug || getSlug()));
-  window.open('https://www.facebook.com/sharer/sharer.php?u=' + url, '_blank');
+  var slug = window._slug || getSlug();
+  var d = window._carteData || {};
+  var url = encodeURIComponent(window.location.origin + window.location.pathname + '?slug=' + slug);
+  var quote = encodeURIComponent('Decouvrez la carte de visite numerique de ' + (d.prenom||'') + ' ' + (d.nom||'') + ' sur CarteViz !');
+  window.open('https://www.facebook.com/sharer/sharer.php?u=' + url + '&quote=' + quote, '_blank');
 }
 
 
