@@ -451,8 +451,19 @@
 
   // Liens WhatsApp dynamiques avec le slug
   function buildWaLinks() {
-    var msgPro = encodeURIComponent("Je veux le plan Pro 1500 FCFA/mois - Ma carte : " + (slug || ""));
-    var msgLifetime = encodeURIComponent("Je veux le plan A vie 10000 FCFA - Ma carte : " + (slug || ""));
+    var nomCarte = slug || "inconnue";
+    var msgPro = encodeURIComponent(
+      "Bonjour ! Je souhaite activer le plan Pro CarteViz (2 500 FCFA/mois).\n\n" +
+      "Ma carte : " + nomCarte + "\n\n" +
+      "Je vais effectuer le paiement via Wave au +221 77 636 27 14.\n" +
+      "Merci de confirmer l'activation apres reception."
+    );
+    var msgLifetime = encodeURIComponent(
+      "Bonjour ! Je souhaite activer le plan A vie CarteViz (15 000 FCFA).\n\n" +
+      "Ma carte : " + nomCarte + "\n\n" +
+      "Je vais effectuer le paiement via Wave au +221 77 636 27 14.\n" +
+      "Merci de confirmer l'activation apres reception."
+    );
     document.getElementById("btnWaPro").href = "https://wa.me/221776362714?text=" + msgPro;
     document.getElementById("btnWaLifetime").href = "https://wa.me/221776362714?text=" + msgLifetime;
   }
