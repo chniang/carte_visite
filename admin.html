@@ -204,6 +204,11 @@
 
 <script>
 (function() {
+  function escapeHtml(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  }
+
   var TOKEN = 'carteviz_admin_2025';
   var BASE = 'https://chniang.github.io/carte_visite/carte.html?slug=';
   var db;
@@ -304,7 +309,7 @@
       {label:'A vie',val:life,color:'#00d4ff',pct:Math.round(life/t*100)},
     ];
     document.getElementById('rep-list').innerHTML = items.map(function(i){
-      return '<div class="rep-item"><span class="rep-label" style="color:'+i.color+'">'+i.label+'</span><div class="rep-bar-bg"><div class="rep-bar" style="width:'+i.pct+'%;background:'+i.color+'"></div></div><span class="rep-count">'+i.val+'</span></div>';
+      return '<div class="rep-item"><span class="rep-label" style="color:'+i.color+'">'+escapeHtml(i.label)+'</span><div class="rep-bar-bg"><div class="rep-bar" style="width:'+i.pct+'%;background:'+i.color+'"></div></div><span class="rep-count">'+i.val+'</span></div>';
     }).join('');
 
     // Top services
@@ -312,7 +317,7 @@
     cartes.forEach(function(c){ (c.services||[]).forEach(function(s){ svc[s]=(svc[s]||0)+1; }); });
     var top = Object.entries(svc).sort(function(a,b){return b[1]-a[1];}).slice(0,8).map(function(e){return e[0];});
     document.getElementById('tags-list').innerHTML = top.length
-      ? top.map(function(s,i){ return '<span class="tag'+(i<3?' hot':'')+'">'+s+'</span>'; }).join('')
+      ? top.map(function(s,i){ return '<span class="tag'+(i<3?' hot':'')+'">'+escapeHtml(s)+'</span>'; }).join('')
       : '<span style="color:var(--muted);font-size:.8rem">Aucune donnee</span>';
 
     buildSparkData(cartes, visites);
@@ -328,9 +333,10 @@
       var bc = plan==='pro'?'badge-pro':plan==='lifetime'?'badge-lifetime':'badge-free';
       var bl = plan==='pro'?'Pro':plan==='lifetime'?'A vie':'Gratuit';
       var date = c.createdAt&&c.createdAt.seconds ? new Date(c.createdAt.seconds*1000).toLocaleDateString('fr-FR') : '—';
-      var svc1 = (c.services&&c.services[0]) ? c.services[0].substring(0,20) : '—';
-      return '<tr><td><strong>'+(c.prenom||'')+' '+(c.nom||'')+'</strong><br><span style="color:var(--muted);font-size:.72rem">'+(c.slug||'')+'</span></td>'
-        +'<td style="color:var(--muted)">'+(c.titre||'').substring(0,28)+'</td>'
+      var svc1 = (c.services&&c.services[0]) ? escapeHtml(c.services[0].substring(0,20)) : '—';
+      var slugSafe = escapeHtml(c.slug||c.id);
+      return '<tr><td><strong>'+escapeHtml(c.prenom||'')+' '+escapeHtml(c.nom||'')+'</strong><br><span style="color:var(--muted);font-size:.72rem">'+slugSafe+'</span></td>'
+        +'<td style="color:var(--muted)">'+escapeHtml((c.titre||'').substring(0,28))+'</td>'
         +'<td style="color:var(--muted);font-size:.78rem">'+svc1+'</td>'
         +'<td><span class="badge '+bc+'">'+bl+'</span></td>'
         +'<td style="font-family:var(--mono)">'+(c.vues||0)+'</td>'
