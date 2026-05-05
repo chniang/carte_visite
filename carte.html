@@ -719,6 +719,12 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+function safeUrl(url) {
+  if (!url) return '#';
+  if (/^https?:\/\//i.test(url)) return url;
+  return '#';
+}
+
 // ── Normalisation numéros WhatsApp (Sénégal +221) ──────────────
 function normalizeWA(tel) {
   let t = tel.replace(/[\s()\-\.]/g, '');
@@ -991,9 +997,9 @@ async function loadCarte() {
 
     // Anciens champs réseaux (compatibilité)
     const socials = [];
-    if (d.github)    socials.push({ href:d.github,    icon:'🐙', label:'GitHub' });
-    if (d.linkedin)  socials.push({ href:d.linkedin,  icon:'💼', label:'LinkedIn' });
-    if (d.portfolio) socials.push({ href:d.portfolio, icon:'🌐', label:'Site Web' });
+    if (d.github)    socials.push({ href:safeUrl(d.github),    icon:'🐙', label:'GitHub' });
+    if (d.linkedin)  socials.push({ href:safeUrl(d.linkedin),  icon:'💼', label:'LinkedIn' });
+    if (d.portfolio) socials.push({ href:safeUrl(d.portfolio), icon:'🌐', label:'Site Web' });
     if (socials.length > 0) {
       document.getElementById('section-socials').style.display = 'block';
       document.getElementById('socials-list').innerHTML = socials.map(s=>
@@ -1009,7 +1015,7 @@ async function loadCarte() {
       document.getElementById('liens-list').innerHTML = liensValides.map(l => {
         const icon = PLATEFORME_ICONS[l.type] || '🔗';
         const label = PLATEFORME_LABELS[l.type] || l.type;
-        return `<a class="social-btn" href="${l.url}" target="_blank"><span>${icon}</span>${label}</a>`;
+        return `<a class="social-btn" href="${safeUrl(l.url)}" target="_blank"><span>${icon}</span>${label}</a>`;
       }).join('');
     }
 
@@ -1366,12 +1372,6 @@ function renderBars(containerId, entries) {
   `).join('');
 }
 
-function getFlagEmoji(code) {
-  if (!code || code.length !== 2) return '🌐';
-  return code.toUpperCase().split('').map(c =>
-    String.fromCodePoint(c.charCodeAt(0) + 127397)
-  ).join('');
-}
 
 function formatTime(date) {
   const now = new Date();

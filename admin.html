@@ -263,7 +263,7 @@
     if (!db) { alert('Firebase non connecte'); return; }
     Promise.all([
       db.collection('cartes').get(),
-      db.collection('visites').get()
+      db.collection('visites').limit(1000).get()
     ]).then(function(results) {
       var cartes = results[0].docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
       var visites = results[1].docs.map(function(d){ return d.data(); });

@@ -458,42 +458,7 @@
   }
   buildWaLinks();
 
-    // Identifier le bouton cliqué
-    const btnIndex = plan === 'monthly' ? 0 : 1;
-    const btns = document.querySelectorAll('.btn-pay-pro, .btn-pay-lifetime');
-    const btn = plan === 'monthly' 
-      ? document.querySelector('.btn-pay-pro') 
-      : document.querySelector('.btn-pay-lifetime');
 
-    btn.disabled = true;
-    btn.querySelector('.btn-text').style.display = 'none';
-    btn.querySelector('.spinner').style.display = 'block';
-
-    try {
-      const res = await fetch(BACKEND + '/api/create-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug, plan, token })
-      });
-
-      const data = await res.json();
-
-      if (data.redirect_url) {
-        showToast('✅ Redirection vers le paiement...', 'success');
-        setTimeout(() => { window.location.href = data.redirect_url; }, 1000);
-      } else {
-        showToast('❌ Erreur PayTech : ' + (data.error || 'inconnue'), 'error');
-        btn.disabled = false;
-        btn.querySelector('.btn-text').style.display = 'inline';
-        btn.querySelector('.spinner').style.display = 'none';
-      }
-    } catch (e) {
-      showToast('❌ Erreur réseau : ' + e.message, 'error');
-      btn.disabled = false;
-      btn.querySelector('.btn-text').style.display = 'inline';
-      btn.querySelector('.spinner').style.display = 'none';
-    }
-  }
 </script>
 </body>
 </html>
