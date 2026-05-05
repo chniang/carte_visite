@@ -112,7 +112,7 @@
   <div class="gate-title">Admin Dashboard</div>
   <p class="gate-sub">Entrez le token administrateur pour continuer</p>
   <div class="gate-row">
-    <input type="password" class="gate-input" id="gate-input" placeholder="TOKEN_ADMIN_SECRET" />
+    <input type="password" class="gate-input" id="gate-input" placeholder="Mot de passe admin" />
     <button class="gate-btn" id="gate-btn">ENTRER</button>
   </div>
   <p class="gate-err" id="gate-err">Token incorrect</p>
@@ -209,7 +209,6 @@
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
   }
 
-  var TOKEN = 'carteviz_admin_2025';
   var BASE = 'https://chniang.github.io/carte_visite/carte.html?slug=';
   var db;
 
@@ -229,6 +228,7 @@
   document.getElementById('gate-btn').onclick = function() { login(); };
   document.getElementById('gate-input').onkeydown = function(e) { if(e.key==='Enter') login(); };
   document.getElementById('logout-btn').onclick = function() {
+    sessionStorage.removeItem('carteviz_admin_jwt');
     document.getElementById('gate').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
     document.getElementById('gate-input').value = '';
@@ -237,16 +237,36 @@
 
   function login() {
     var val = document.getElementById('gate-input').value.trim();
-    if (val === TOKEN) {
-      document.getElementById('gate').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      loadData();
-    } else {
+    if (!val) return;
+    var btn = document.getElementById('gate-btn');
+    btn.disabled = true;
+    fetch('https://carteviz-backend.vercel.app/api/admin-login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({password: val})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      btn.disabled = false;
+      if (data.token) {
+        sessionStorage.setItem('carteviz_admin_jwt', data.token);
+        document.getElementById('gate').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        loadData();
+      } else {
+        var err = document.getElementById('gate-err');
+        err.style.display = 'block';
+        err.textContent = data.error || 'Mot de passe incorrect';
+        setTimeout(function(){ err.style.display='none'; }, 3000);
+      }
+    })
+    .catch(function() {
+      btn.disabled = false;
       var err = document.getElementById('gate-err');
       err.style.display = 'block';
-      err.textContent = 'Token incorrect';
+      err.textContent = 'Erreur de connexion';
       setTimeout(function(){ err.style.display='none'; }, 3000);
-    }
+    });
   }
 
   function fmt(n) {
@@ -425,7 +445,7 @@
     fetch('https://carteviz-backend.vercel.app/api/activate-plan', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({slug: slug, plan: plan, admin_token: 'carteviz_admin_2025'})
+      body: JSON.stringify({slug: slug, plan: plan, admin_token: sessionStorage.getItem('carteviz_admin_jwt')})
     })
     .then(function(r){ return r.json(); })
     .then(function(data){

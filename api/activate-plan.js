@@ -1,5 +1,6 @@
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import jwt from 'jsonwebtoken';
 
 if (!getApps().length) {
   initializeApp({ credential: cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)) });
@@ -14,7 +15,11 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const { slug, plan, admin_token } = req.body;
-  if (admin_token !== "carteviz_admin_2025") return res.status(403).json({ error: "Token invalide" });
+  try {
+    jwt.verify(admin_token, process.env.JWT_SECRET);
+  } catch {
+    return res.status(403).json({ error: "Token invalide" });
+  }
   if (!slug || !plan) return res.status(400).json({ error: "slug et plan requis" });
 
   try {
