@@ -394,6 +394,10 @@
       <a id="btnWaPro" href="#" class="btn-pay btn-pay-pro" target="_blank" rel="noopener">
         💬 Payer 1 500 FCFA via WhatsApp
       </a>
+      <!-- TODO: activer quand NINEA obtenu -->
+      <button id="btn-paydunya-pro" class="btn-pay btn-pay-pro" style="display:none" onclick="payDunya('pro')">
+        💳 Payer 2 500 FCFA en ligne
+      </button>
       <p class="pay-note">Paiement via Wave au +221 77 636 27 14 · Orange Money bientôt disponible</p>
     </div>
 
@@ -414,13 +418,17 @@
       <a id="btnWaLifetime" href="#" class="btn-pay btn-pay-lifetime" target="_blank" rel="noopener">
         💬 Payer 10 000 FCFA via WhatsApp
       </a>
+      <!-- TODO: activer quand NINEA obtenu -->
+      <button id="btn-paydunya-lifetime" class="btn-pay btn-pay-lifetime" style="display:none" onclick="payDunya('lifetime')">
+        💳 Payer 15 000 FCFA en ligne
+      </button>
       <p class="pay-note">Paiement via Wave au +221 77 636 27 14 · Orange Money bientôt disponible</p>
     </div>
 
   </div>
 
   <div class="security">
-    🔒 Paiement sécurisé via PayTech — Wave, Orange Money, Carte bancaire
+    🔒 Paiement sécurisé via Wave · Orange Money · Carte bancaire
   </div>
 </div>
 
@@ -469,6 +477,38 @@
   }
   buildWaLinks();
 
+
+  // TODO: activer quand NINEA obtenu — integration PayDunya sandbox
+  async function payDunya(plan) {
+    var btn = document.getElementById("btn-paydunya-" + plan);
+    if (!btn || btn.disabled) return;
+    if (!slug || !token) {
+      showToast("Lien invalide — slug ou token manquant", "error");
+      return;
+    }
+    var label = plan === "lifetime" ? "💳 Payer 15\u00a0000 FCFA en ligne" : "💳 Payer 2\u00a0500 FCFA en ligne";
+    btn.disabled = true;
+    btn.textContent = "Redirection en cours...";
+    try {
+      var resp = await fetch(BACKEND + "/api/create-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: slug, plan: plan, token: token })
+      });
+      var data = await resp.json();
+      if (data.redirect_url) {
+        window.location.href = data.redirect_url;
+      } else {
+        showToast(data.error || "Erreur paiement", "error");
+        btn.disabled = false;
+        btn.textContent = label;
+      }
+    } catch(e) {
+      showToast("Erreur reseau", "error");
+      btn.disabled = false;
+      btn.textContent = label;
+    }
+  }
 
 </script>
 </body>
