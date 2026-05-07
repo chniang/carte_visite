@@ -502,7 +502,10 @@
     textDiv.style.color = 'var(--muted)';
     fetch('https://carteviz-backend.vercel.app/api/ai-chat', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + (sessionStorage.getItem('carteviz_admin_jwt') || '')
+      },
       body: JSON.stringify({question: q, context: buildContext()})
     })
     .then(function(r){return r.json();})
