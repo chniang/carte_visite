@@ -1,9 +1,44 @@
+const rateLimitMap = new Map();
+const MAX_REQUESTS = 10;
+const WINDOW_MS = 60 * 60 * 1000;
+
+function getIP(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) return forwarded.split(',')[0].trim();
+  return req.socket?.remoteAddress || 'unknown';
+}
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now - entry.windowStart > WINDOW_MS) {
+    rateLimitMap.set(ip, { count: 1, windowStart: now });
+    return true;
+  }
+  if (entry.count >= MAX_REQUESTS) return false;
+  entry.count++;
+  return true;
+}
+
+function cleanExpired() {
+  const now = Date.now();
+  for (const [ip, entry] of rateLimitMap) {
+    if (now - entry.windowStart > WINDOW_MS) rateLimitMap.delete(ip);
+  }
+}
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "https://chniang.github.io");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+
+  const ip = getIP(req);
+  cleanExpired();
+  if (!checkRateLimit(ip)) {
+    return res.status(429).json({ error: "Trop de requetes. Reessayez dans une heure." });
+  }
 
   const { question, context } = req.body;
   if (!question) return res.status(400).json({ error: "question required" });
