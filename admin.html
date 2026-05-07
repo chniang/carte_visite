@@ -294,13 +294,20 @@
     }).catch(function(e){ console.error(e); });
   }
 
+  function isProActive(c) {
+    if (c.plan !== 'pro') return false;
+    var expire = c.plan_expire;
+    if (!expire) return false;
+    return new Date(expire.seconds ? expire.seconds * 1000 : expire) > new Date();
+  }
+
   function render(cartes, visites, vuesParSlug) {
     visites = visites || [];
     vuesParSlug = vuesParSlug || {};
     var total = cartes.length;
-    var pro = cartes.filter(function(c){ return c.plan === 'pro'; }).length;
+    var pro  = cartes.filter(function(c){ return isProActive(c); }).length;
     var life = cartes.filter(function(c){ return c.plan === 'lifetime'; }).length;
-    var free = cartes.filter(function(c){ return !c.plan || c.plan === 'free'; }).length;
+    var free = cartes.filter(function(c){ return !isProActive(c) && c.plan !== 'lifetime'; }).length;
     var vues = Object.values(vuesParSlug).reduce(function(s,n){ return s+n; }, 0);
     var mrr = pro * 2500;
     var ltv = life * 15000;
