@@ -1216,29 +1216,48 @@ function setupUpgradeBanner(data) {
   }
 }
 
-function toggleDashboard() {
-  // Verifier plan Pro
-  const d = window._carteData;
-  const plan = d && d.plan;
-  const expire = d && d.plan_expire;
-  const isActive = (plan === 'pro' || plan === 'lifetime') &&
-    (!expire || new Date(expire.seconds ? expire.seconds*1000 : expire) > new Date());
-  if (!isActive) {
-    const slug = new URLSearchParams(window.location.search).get('slug');
-    const owner = new URLSearchParams(window.location.search).get('owner');
-    window.location.href = 'paiement.html?slug=' + slug + (owner ? '&owner=' + owner : '');
-    return;
-  }
+async function toggleDashboard() {
   const section = document.getElementById('dashboard-section');
   const btn = document.getElementById('btn-dashboard');
+
   if (section.style.display === 'block') {
     section.style.display = 'none';
     btn.textContent = '📊 Voir mes statistiques';
-  } else {
-    section.style.display = 'block';
-    btn.textContent = '✕ Fermer les statistiques';
-    if (!dashLoaded) { loadDashboard(); dashLoaded = true; }
+    return;
   }
+
+  const slug = new URLSearchParams(window.location.search).get('slug');
+  const owner = new URLSearchParams(window.location.search).get('owner');
+
+  btn.textContent = '⏳ Vérification...';
+  btn.disabled = true;
+
+  let isPro = false;
+  try {
+    const resp = await fetch(
+      'https://carteviz-backend.vercel.app/api/verify-plan?slug=' +
+      encodeURIComponent(slug || '') + '&owner_token=' + encodeURIComponent(owner || '')
+    );
+    const json = await resp.json();
+    isPro = !!json.isPro;
+  } catch(e) {
+    const d = window._carteData;
+    const plan = d && d.plan;
+    const expire = d && d.plan_expire;
+    isPro = (plan === 'pro' || plan === 'lifetime') &&
+      (!expire || new Date(expire.seconds ? expire.seconds*1000 : expire) > new Date());
+  }
+
+  btn.disabled = false;
+  if (!isPro) {
+    btn.textContent = '📊 Voir mes statistiques';
+    window.location.href = 'paiement.html?slug=' + slug + (owner ? '&owner=' + owner : '');
+    return;
+  }
+
+  btn.textContent = '✕ Fermer les statistiques';
+  section.style.display = 'block';
+  if (!dashLoaded) { loadDashboard(); dashLoaded = true; }
 }
 
 async function loadDashboard() {
