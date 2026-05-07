@@ -493,7 +493,7 @@
       var resp = await fetch(BACKEND + "/api/create-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug: slug, plan: plan, token: token })
+        body: JSON.stringify({ slug: slug, plan: plan, owner_token: token })
       });
       var data = await resp.json();
       if (data.redirect_url) {
