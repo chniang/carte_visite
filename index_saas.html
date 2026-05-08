@@ -1692,39 +1692,19 @@
     btn.disabled = true;
 
     try {
-      // Trouver un slug disponible (auto-incrément si déjà pris)
-      let finalSlug = slug;
-      let counter = 1;
-      while (true) {
-        const existing = await db.collection('cartes').doc(finalSlug).get();
-        if (!existing.exists) break;
-        counter++;
-        finalSlug = `${slug}-${counter}`;
-      }
-      const slug2 = finalSlug; // slug final disponible
-
-      // Générer un token propriétaire unique
-      const token = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
-
-      // Données à sauvegarder
-      const carteData = {
-        slug: slug2, prenom, nom, titre, bio, tel,
-        email, lieu, github, linkedin, portfolio, photo,
-        services,
-        liens: getLiens(),
-        owner_token: token,
-        plan: 'free',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        vues: 0,
-        clics_whatsapp: 0
-      };
-
-      await db.collection('cartes').doc(slug2).set(carteData);
+      const resp = await fetch('https://carteviz-backend.vercel.app/api/create-card', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prenom, nom, titre, bio, tel, email, lieu, photo,
+                               services, liens: getLiens() })
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Erreur serveur');
 
       // Succès
       const baseUrl = window.location.origin + window.location.pathname.replace('index_saas.html','');
-      const url = `${baseUrl}carte.html?slug=${slug2}`;
-      const ownerUrl = `${window.location.origin}${window.location.pathname.replace('index_saas.html','').replace('carte.html','')}carte.html?slug=${slug}&owner=${token}`;
+      const url = `${baseUrl}carte.html?slug=${data.slug}`;
+      const ownerUrl = `${window.location.origin}${window.location.pathname.replace('index_saas.html','').replace('carte.html','')}carte.html?slug=${data.slug}&owner=${data.token}`;
       alert.className = 'success';
       alert.style.display = 'block';
       const shareMsg = encodeURIComponent("Voici ma carte de visite numerique : " + url);
