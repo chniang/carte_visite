@@ -1078,12 +1078,15 @@ function applyTheme(swatchEl) {
   // Marquer actif
   document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
   swatchEl.classList.add('active');
-  // Sauvegarder dans Firestore
+  // Sauvegarder via backend
   const slug = new URLSearchParams(window.location.search).get('slug');
-  if (slug) {
-    db.collection('cartes').doc(slug).update({ theme_color: color })
-      .then(() => console.log('Thème sauvegardé'))
-      .catch(e => console.error('Erreur save thème', e));
+  const ownerToken = getOwnerToken();
+  if (slug && ownerToken) {
+    fetch('https://carteviz-backend.vercel.app/api/update-card', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug, owner_token: ownerToken, champs: { theme_color: color } })
+    }).catch(e => console.error('Erreur save theme', e));
   }
 }
 
@@ -1181,9 +1184,17 @@ function saveServiceDescs() {
     if (el && el.value.trim()) descs[s] = el.value.trim();
   });
   const slug = new URLSearchParams(window.location.search).get('slug');
-  db.collection('cartes').doc(slug).update({ services_descriptions: descs })
-    .then(() => alert('✅ Descriptions sauvegardées !'))
-    .catch(e => alert('❌ Erreur : ' + e.message));
+  const ownerToken = getOwnerToken();
+  fetch('https://carteviz-backend.vercel.app/api/update-card', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slug, owner_token: ownerToken, champs: { services_descriptions: descs } })
+  }).then(r => r.json())
+    .then(data => {
+      if (data.success) alert("\u2705 Descriptions sauvegardees !");
+      else alert("\u274c Erreur : " + (data.error || "inconnue"));
+    })
+    .catch(e => alert("\u274c Erreur : " + e.message));
 }
 
 function setupUpgradeBanner(data) {
