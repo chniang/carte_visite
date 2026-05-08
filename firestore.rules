@@ -3,19 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /cartes/{slug} {
 
-      allow create: if
-        slug.size() >= 3 && slug.size() <= 60 &&
-        request.resource.data.keys().hasAll(['prenom', 'nom', 'owner_token', 'plan']) &&
-        request.resource.data.prenom is string &&
-        request.resource.data.prenom.size() > 0 &&
-        request.resource.data.prenom.size() <= 50 &&
-        request.resource.data.nom is string &&
-        request.resource.data.nom.size() > 0 &&
-        request.resource.data.nom.size() <= 50 &&
-        request.resource.data.owner_token is string &&
-        request.resource.data.owner_token.size() >= 16 &&
-        request.resource.data.plan == 'free' &&
-        !request.resource.data.keys().hasAny(['plan_expire', 'plan_activated_at']);
+      allow create: if false;
 
       allow read: if true;
 
