@@ -1677,15 +1677,6 @@
 
     const slug = generateSlug(prenom, nom);
 
-    // Mode démo (Firebase non configuré)
-    if (!firebaseReady) {
-      alert.className = 'success';
-      alert.style.display = 'block';
-      alert.innerHTML = "🎉 <strong>Mode démo</strong> &#8212; Carte créée avec succès !<br/>"
-        + "<small>Configure Firebase pour activer la sauvegarde réelle.</small><br/>"
-        + "<span class='alert-url'>carteviz.com/" + slug + "</span>";
-      return;
-    }
 
     // Spinner
     btn.classList.add('loading');
