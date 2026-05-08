@@ -20,9 +20,8 @@ service cloud.firestore {
       allow read: if true;
 
       allow update: if
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny(
-          ['plan', 'plan_expire', 'plan_activated_at', 'owner_token']
-        );
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['vues', 'clics_whatsapp']);
 
       allow delete: if false;
     }
