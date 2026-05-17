@@ -1,0 +1,16 @@
+{
+  "name": "CarteViz",
+  "short_name": "CarteViz",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#7c3aed",
+  "start_url": "./carte.html",
+  "icons": [
+    {
+      "src": "./images/carte_visite.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

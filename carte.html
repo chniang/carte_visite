@@ -9,6 +9,23 @@
   <meta property="og:image" content="https://chniang.github.io/carte_visite/images/carte_visite.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#7c3aed">
+  <link rel="manifest" id="pwa-manifest" href="manifest.json">
+  <script>
+    (function(){
+      var slug = new URLSearchParams(window.location.search).get("slug");
+      if (slug) {
+        var m = {
+          name:"CarteViz", short_name:"CarteViz", display:"standalone",
+          background_color:"#0a0a0f", theme_color:"#7c3aed",
+          start_url:"./carte.html?slug=" + slug,
+          icons:[{src:"./images/carte_visite.png",sizes:"512x512",type:"image/png",purpose:"any maskable"}]
+        };
+        var blob = new Blob([JSON.stringify(m)], {type:"application/json"});
+        document.getElementById("pwa-manifest").href = URL.createObjectURL(blob);
+      }
+    })();
+  </script>
   <title>CarteViz — Carte de visite</title>
 
   <!-- Fonts (hébergées localement — zéro requête externe) -->
@@ -1437,6 +1454,13 @@ loadCarte();
       if(s) s.style.display = "none";
     }
   })();
+</script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function() {
+      navigator.serviceWorker.register("./sw.js").catch(function(){});
+    });
+  }
 </script>
 </body>
 </html>
