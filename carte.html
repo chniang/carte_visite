@@ -1427,5 +1427,16 @@ loadCarte();
     <button class="modal-close" onclick="closeServiceModal()">✕ Fermer</button>
   </div>
 </div>
+<div id="carteviz-sig" style="text-align:center;padding:1.5rem 0 1rem;font-size:.72rem;color:#888;letter-spacing:.03em;">
+  <a href="https://chniang.github.io/carte_visite/index_saas.html" target="_blank" style="color:#888;text-decoration:none;">✨ Créé avec CarteViz</a>
+</div>
+<script>
+  (function(){
+    if(new URLSearchParams(window.location.search).get("owner")){
+      var s = document.getElementById("carteviz-sig");
+      if(s) s.style.display = "none";
+    }
+  })();
+</script>
 </body>
 </html>
