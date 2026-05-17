@@ -1696,6 +1696,7 @@
       const baseUrl = window.location.origin + window.location.pathname.replace('index_saas.html','');
       const url = `${baseUrl}carte.html?slug=${data.slug}`;
       const ownerUrl = `${window.location.origin}${window.location.pathname.replace('index_saas.html','').replace('carte.html','')}carte.html?slug=${data.slug}&owner=${data.token}`;
+      const ownerWaUrl = "https://wa.me/?text=" + encodeURIComponent("🔐 Mon lien privé CarteViz (dashboard + stats) : " + ownerUrl);
       alert.className = 'success';
       alert.style.display = 'block';
       const shareMsg = encodeURIComponent("Voici ma carte de visite numerique : " + url);
@@ -1708,6 +1709,7 @@
         <div style="margin-top:.75rem;padding:.75rem;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.3);border-radius:8px;">
           <div style="font-size:.78rem;color:#a0a0c0;margin-bottom:.35rem;">🔐 Votre lien privé (dashboard + stats) — à garder précieusement :</div>
           <a class="alert-url" href="${ownerUrl}" target="_blank" style="color:#a78bfa">${ownerUrl}</a>
+          <a href="${ownerWaUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;margin:.5rem 0 0;padding:8px 16px;background:#7C3AED;color:#fff;border-radius:8px;font-weight:700;text-decoration:none;font-size:.88rem;">📱 Sauvegarder mon lien privé sur WhatsApp</a>
           <div style="font-size:.72rem;color:#a0a0c0;margin-top:.35rem;">⚠️ Sauvegardez ce lien dans vos favoris ou sur WhatsApp. Il ne sera plus affiché.</div>
         </div>
       `;
