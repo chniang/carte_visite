@@ -1357,7 +1357,7 @@
           <p class="preview-bio" id="prev-bio" style="display:none"></p>
           <div class="preview-contacts" id="prev-contacts"></div>
           <div class="preview-chips" id="prev-services"></div>
-          <div class="preview-url" id="prev-url">carteviz.com/<span>prenom-nom</span></div>
+          <div class="preview-url" id="prev-url">chniang.github.io/carte_visite/carte.html?slug=<span>prenom-nom</span></div>
         </div>
       </div>
 
@@ -1596,7 +1596,7 @@
     const slug = (prenom || nom)
       ? generateSlug(prenom || 'prenom', nom || 'nom')
       : 'prenom-nom';
-    document.getElementById('prev-url').innerHTML = `carteviz.com/<span style="color:var(--accent)">${slug}</span>`;
+    document.getElementById('prev-url').innerHTML = `chniang.github.io/carte_visite/carte.html?slug=<span style="color:var(--accent)">${slug}</span>`;
   }
 
   // Listeners pour la preview live
