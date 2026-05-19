@@ -1,4 +1,4 @@
-var CACHE = 'carteviz-v1';
+var CACHE = 'carteviz-v2';
 
 self.addEventListener('install', function(e) {
   e.waitUntil(caches.open(CACHE).then(function(c) { return c.add('./carte.html'); }));
