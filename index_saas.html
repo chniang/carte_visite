@@ -1406,7 +1406,7 @@
     <!-- PRO -->
     <div class="pc-v3 pc-popular" id="pc-pro" onclick="selectPlan('pro', this)">
       <div class="pc-badge">&#11088; Recommandé</div>
-      <div class="pc-name">Pro</div>
+      <div class="pc-name">Annuel</div>
       <ul class="pc-features">
         <li class="pc-feat-item">
           <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Tout du plan Gratuit</span></div>
@@ -1429,17 +1429,17 @@
           <p class="pc-feat-desc">Accès prioritaire au support via WhatsApp.</p>
         </li>
       </ul>
-      <button class="pc-btn" onclick="event.stopPropagation();selectPlan('pro',document.getElementById('pc-pro'));document.getElementById('creer').scrollIntoView({behavior:'smooth'})">Choisir le plan Pro</button>
+      <button class="pc-btn" onclick="event.stopPropagation();selectPlan('pro',document.getElementById('pc-pro'));document.getElementById('creer').scrollIntoView({behavior:'smooth'})">Choisir le plan Annuel</button>
       <p class="pc-price-hint">Prix affiché lors de la génération</p>
     </div>
 
     <!-- A VIE -->
     <div class="pc-v3" id="pc-lifetime" onclick="selectPlan('lifetime', this)">
-      <div class="pc-badge pc-badge-lifetime">&#128293; Offre lancement</div>
+      <div class="pc-badge pc-badge-lifetime">&#9889; Meilleure valeur</div>
       <div class="pc-name">A vie</div>
       <ul class="pc-features">
         <li class="pc-feat-item">
-          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Tout du plan Pro</span></div>
+          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Tout du plan Annuel</span></div>
           <p class="pc-feat-desc">Analytics, personnalisation, support &#8212; tout est inclus sans limite de durée.</p>
         </li>
         <li class="pc-feat-item">
@@ -1459,6 +1459,32 @@
       <p class="pc-price-hint">Prix affiché lors de la génération</p>
     </div>
 
+    <!-- BUSINESS -->
+    <div class="pc-v3" id="pc-business" onclick="selectPlan('business', this)">
+      <div class="pc-badge pc-badge-lifetime">&#127962; Entreprises</div>
+      <div class="pc-name">Business</div>
+      <ul class="pc-features">
+        <li class="pc-feat-item">
+          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Jusqu'a 10 cartes equipe</span></div>
+          <p class="pc-feat-desc">Creez et gerez jusqu'a 10 cartes pour vos collaborateurs depuis un seul compte.</p>
+        </li>
+        <li class="pc-feat-item">
+          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Dashboard unifie</span></div>
+          <p class="pc-feat-desc">Statistiques centralisees pour toute votre equipe en un seul endroit.</p>
+        </li>
+        <li class="pc-feat-item">
+          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Support dedie</span></div>
+          <p class="pc-feat-desc">Un interlocuteur dedie pour la configuration et le suivi de votre compte.</p>
+        </li>
+        <li class="pc-feat-item">
+          <div class="pc-feat-top"><span class="pc-check">&#10003;</span><span class="pc-feat-name">Facturation entreprise</span></div>
+          <p class="pc-feat-desc">Facture officielle avec NINEA — compatible comptabilite d'entreprise.</p>
+        </li>
+      </ul>
+      <a href="https://wa.me/221776362714?text=Bonjour%2C%20je%20suis%20interesse%20par%20le%20plan%20Business%20CarteViz%20(75%20000%20FCFA%2Fan)." target="_blank" class="pc-btn" style="text-decoration:none;display:block;text-align:center" onclick="event.stopPropagation()">Contacter pour le Business</a>
+      <p class="pc-price-hint">75 000 FCFA / an — sur devis</p>
+    </div>
+
   </div>
 </section>
 
@@ -1467,7 +1493,7 @@
   <div class="modal-card">
     <button class="modal-close" onclick="fermerModalPaiement()" aria-label="Fermer">&#10005;</button>
     <div class="modal-title">Paiement bientôt disponible</div>
-    <div class="modal-price-line" id="modal-prix-ligne">1 500 FCFA/mois</div>
+    <div class="modal-price-line" id="modal-prix-ligne">10 000 FCFA/an</div>
     <p class="modal-subtitle">Nous intégrons les paiements Wave et Orange Money prochainement.<br>En attendant, vous pouvez continuer en mode test.</p>
     <button class="modal-btn modal-btn-disabled" disabled>Paiement via Wave (bientôt)</button>
     <button class="modal-btn modal-btn-disabled" disabled>Paiement via Orange Money (bientôt)</button>
@@ -1620,7 +1646,7 @@
   }
 
   function ouvrirModalPaiement() {
-    var prix = selectedPlan === 'lifetime' ? '10 000 FCFA (paiement unique)' : '1 500 FCFA / mois';
+    var prix = selectedPlan === 'lifetime' ? '25 000 FCFA (paiement unique)' : selectedPlan === 'business' ? '75 000 FCFA / an' : '10 000 FCFA / an';
     document.getElementById('modal-prix-ligne').textContent = prix;
     document.getElementById('modal-paiement').classList.add('open');
   }
