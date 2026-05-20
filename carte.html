@@ -693,6 +693,28 @@
       </div>
     </div>
 
+
+    <!-- Rejoindre une equipe Business -->
+    <div id="join-team-section" style="display:none">
+      <div class="dash-section">
+        <span class="dash-section-title">&#128101; Rejoindre une equipe</span>
+        <p style="font-size:.82rem;color:rgba(255,255,255,0.5);margin-bottom:12px">
+          Votre manager vous a donne un code equipe ? Entrez-le ci-dessous pour rejoindre son equipe Business.
+        </p>
+        <div style="display:flex;gap:8px">
+          <input id="team-code-input" type="text" maxlength="6"
+            placeholder="Ex: A3F9C2"
+            style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:#fff;font-family:monospace;font-size:1.1rem;font-weight:700;letter-spacing:.15em;padding:.6rem 1rem;outline:none;text-transform:uppercase"
+            oninput="this.value=this.value.toUpperCase()" />
+          <button onclick="joinTeam()"
+            style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;font-weight:700;font-size:.85rem;padding:.6rem 1.2rem;border:none;border-radius:8px;cursor:pointer;white-space:nowrap">
+            &#128101; Rejoindre
+          </button>
+        </div>
+        <div id="join-team-msg" style="font-size:.8rem;margin-top:8px;min-height:20px"></div>
+      </div>
+    </div>
+
     <!-- Métriques principales -->
     <div class="metrics-grid">
       <div class="metric-card">
@@ -1312,6 +1334,12 @@ async function toggleDashboard() {
   btn.textContent = '✕ Fermer les statistiques';
   section.style.display = 'block';
   if (!dashLoaded) { loadDashboard(); dashLoaded = true; }
+  // Afficher section rejoindre equipe si non manager
+  var d = window._carteData;
+  var joinSec = document.getElementById('join-team-section');
+  if (joinSec && d && d.team_role !== 'manager' && !d.team_code) {
+    joinSec.style.display = 'block';
+  }
 }
 
 async function loadDashboard() {
@@ -1459,6 +1487,68 @@ async function loadDashboard() {
     if (tauxErrEl) tauxErrEl.textContent = '—';
     const topErrEl = document.getElementById('d-top-services');
     if (topErrEl) topErrEl.innerHTML = errMsg;
+  }
+}
+
+
+function shareTeamCode() {
+  var code = window._teamCode || document.getElementById('team-code-val').textContent;
+  var msg = encodeURIComponent(
+    'Rejoignez mon equipe CarteViz Business !\n\n' +
+    'Code equipe : ' + code + '\n\n' +
+    'Pour rejoindre :\n' +
+    '1. Ouvrez votre carte CarteViz\n' +
+    '2. Allez dans vos statistiques\n' +
+    '3. Entrez le code : ' + code
+  );
+  window.open('https://wa.me/?text=' + msg, '_blank');
+}
+
+function copyTeamCode() {
+  var code = window._teamCode || document.getElementById('team-code-val').textContent;
+  navigator.clipboard.writeText(code).then(function() {
+    alert('Code copie : ' + code);
+  }).catch(function() {
+    prompt('Code equipe :', code);
+  });
+}
+
+async function joinTeam() {
+  var code = (document.getElementById('team-code-input').value || '').trim().toUpperCase();
+  var msgEl = document.getElementById('join-team-msg');
+  if (!code || code.length < 4) {
+    msgEl.style.color = '#ef4444';
+    msgEl.textContent = 'Entrez un code valide.';
+    return;
+  }
+  var slug = window._slug;
+  var ownerToken = getOwnerToken();
+  if (!slug || !ownerToken) {
+    msgEl.style.color = '#ef4444';
+    msgEl.textContent = 'Erreur : lien owner invalide.';
+    return;
+  }
+  msgEl.style.color = 'rgba(255,255,255,0.5)';
+  msgEl.textContent = 'Connexion en cours...';
+  try {
+    var resp = await fetch('https://carteviz-backend.vercel.app/api/join-team', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({slug: slug, owner_token: ownerToken, team_code: code})
+    });
+    var data = await resp.json();
+    if (data.success) {
+      msgEl.style.color = '#34d399';
+      msgEl.textContent = 'Vous avez rejoint l equipe ! Rechargez la page.';
+      document.getElementById('team-code-input').value = '';
+      setTimeout(function(){ location.reload(); }, 2500);
+    } else {
+      msgEl.style.color = '#ef4444';
+      msgEl.textContent = 'Erreur : ' + (data.error || 'Code invalide.');
+    }
+  } catch(e) {
+    msgEl.style.color = '#ef4444';
+    msgEl.textContent = 'Erreur de connexion.';
   }
 }
 
