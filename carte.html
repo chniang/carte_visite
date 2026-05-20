@@ -543,7 +543,6 @@
     }
 
   </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -610,7 +609,6 @@
       <div id="qr-container"></div>
       <span class="btn-dl-qr" onclick="downloadQR()">⬇️ Télécharger le QR code</span>
       <span class="btn-dl-qr" onclick="downloadVCard()">📇 Télécharger la vCard</span>
-      <span class="btn-dl-qr" id="btn-pdf" onclick="downloadPDF()">&#128196; Telecharger PDF</span>
     </div>
   </div>
 
@@ -1080,141 +1078,6 @@ async function loadCarte() {
 }
 
 
-// ── PDF A4 ──────────────────────────────────────────────────────
-async function downloadPDF() {
-  var d = window._carteData;
-  if (!d) return;
-  if (!window.jspdf) { alert('PDF indisponible. Verifiez votre connexion.'); return; }
-  var btnEl = document.getElementById('btn-pdf');
-  if (btnEl) { btnEl.textContent = 'Generation...'; btnEl.style.pointerEvents = 'none'; }
-  try {
-    var jsPDF = window.jspdf.jsPDF;
-    var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    var W = 210, H = 297;
-    var cX = 25, cY = 18, cW = 160, cH = 240;
-
-    doc.setFillColor(10, 15, 28);
-    doc.rect(0, 0, W, H, 'F');
-
-    doc.setFillColor(22, 27, 52);
-    doc.roundedRect(cX, cY, cW, cH, 10, 10, 'F');
-    doc.setDrawColor(99, 52, 210);
-    doc.setLineWidth(0.4);
-    doc.roundedRect(cX, cY, cW, cH, 10, 10, 'S');
-
-    doc.setFillColor(99, 52, 210);
-    doc.roundedRect(cX, cY, cW, 2.5, 1, 1, 'F');
-
-    var y = cY + 18;
-
-    var photoOK = false;
-    if (d.photo_url) {
-      try {
-        var proxyURL = 'https://carteviz-backend.vercel.app/api/proxy-photo?url=' + encodeURIComponent(d.photo_url);
-        var resp = await fetch(proxyURL);
-        var blob = await resp.blob();
-        var b64 = await new Promise(function(res) {
-          var r = new FileReader();
-          r.onload = function() { res(r.result); };
-          r.readAsDataURL(blob);
-        });
-        if (b64) {
-          doc.addImage(b64, 'JPEG', W / 2 - 20, y, 40, 40);
-          photoOK = true;
-        }
-      } catch(e) { console.warn('Photo PDF error:', e); }
-    }
-    if (!photoOK) {
-      doc.setFillColor(99, 52, 210);
-      doc.circle(W / 2, y + 20, 20, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(20);
-      doc.text(((d.prenom || '?')[0]).toUpperCase(), W / 2, y + 25, { align: 'center' });
-    }
-    y += 48;
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(22);
-    doc.setTextColor(240, 246, 252);
-    doc.text(((d.prenom || '') + ' ' + (d.nom || '')).trim(), W / 2, y, { align: 'center' });
-    y += 9;
-
-    if (d.titre) {
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(12);
-      doc.setTextColor(167, 139, 250);
-      doc.text(d.titre, W / 2, y, { align: 'center' });
-      y += 9;
-    }
-
-    doc.setDrawColor(55, 35, 90);
-    doc.setLineWidth(0.3);
-    doc.line(cX + 20, y, cX + cW - 20, y);
-    y += 9;
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(180, 190, 215);
-    if (d.tel)   { doc.text('Tel : +' + String(d.tel).replace(/\D/g, ''), cX + 14, y); y += 7; }
-    if (d.email) { doc.text('Email : ' + d.email, cX + 14, y); y += 7; }
-    if (d.lieu)  { doc.text('Lieu : ' + d.lieu, cX + 14, y); y += 7; }
-    y += 4;
-
-    if (d.services && d.services.length) {
-      var sx = cX + 12, ry = y;
-      doc.setFontSize(8);
-      d.services.forEach(function(svc) {
-        var tw = doc.getTextWidth(svc) + 8;
-        if (sx + tw > cX + cW - 12) { sx = cX + 12; ry += 10; }
-        doc.setFillColor(35, 20, 70);
-        doc.setDrawColor(99, 52, 210);
-        doc.setLineWidth(0.2);
-        doc.roundedRect(sx - 2, ry - 5.5, tw, 8, 2, 2, 'FD');
-        doc.setTextColor(167, 139, 250);
-        doc.text(svc, sx + 2, ry);
-        sx += tw + 4;
-      });
-      y = ry + 14;
-    }
-
-    doc.setDrawColor(55, 35, 90);
-    doc.line(cX + 20, y, cX + cW - 20, y);
-    y += 10;
-
-    var qrCanvas = document.querySelector('#qr-container canvas');
-    if (qrCanvas) {
-      var qrSize = 40;
-      doc.addImage(qrCanvas.toDataURL('image/png'), 'PNG', W / 2 - qrSize / 2, y, qrSize, qrSize);
-      doc.setFontSize(8);
-      doc.setTextColor(130, 140, 165);
-      doc.text('Scannez pour voir la carte en ligne', W / 2, y + qrSize + 5, { align: 'center' });
-      y += qrSize + 12;
-    }
-
-    var slug = window._slug || '';
-    doc.setFontSize(8);
-    doc.setTextColor(99, 102, 241);
-    doc.text(window.location.origin + window.location.pathname + '?slug=' + slug, W / 2, y, { align: 'center' });
-
-    doc.setFontSize(8);
-    doc.setTextColor(70, 80, 100);
-    doc.text('Cree avec CarteViz', W / 2, H - 12, { align: 'center' });
-    doc.setFontSize(7);
-    doc.setTextColor(99, 52, 210);
-    doc.text('chniang.github.io/carte_visite/', W / 2, H - 7, { align: 'center' });
-
-    var fname = ((d.prenom || '') + '-' + (d.nom || '')).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    doc.save('carte-' + (fname || slug || 'carteviz') + '.pdf');
-
-  } catch(err) {
-    console.error('PDF error:', err);
-    alert('Erreur PDF : ' + err.message);
-  } finally {
-    if (btnEl) { btnEl.textContent = '\u{1F4C4} Telecharger PDF'; btnEl.style.pointerEvents = ''; }
-  }
-}
-// ────────────────────────────────────────────────────────────────
 
 function downloadQR() {
   const canvas = document.querySelector('#qr-container canvas');
