@@ -103,7 +103,10 @@
     .kpi-spark { margin-top: .4rem; }
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
     .pulse{animation:pulse 2s infinite;display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:.4rem}
-  </style>
+  
+    .badge-business{background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);font-size:.65rem;padding:.15rem .55rem;border-radius:999px;font-family:var(--mono)}
+    .badge-annual{background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.3);font-size:.65rem;padding:.15rem .55rem;border-radius:999px;font-family:var(--mono)}
+    </style>
 </head>
 <body>
 
@@ -357,8 +360,8 @@
     }
     document.getElementById('tbody').innerHTML = sorted.map(function(c){
       var plan = c.plan||'free';
-      var bc = plan==='pro'?'badge-pro':plan==='lifetime'?'badge-lifetime':'badge-free';
-      var bl = plan==='pro'?'Pro':plan==='lifetime'?'A vie':'Gratuit';
+      var bc = plan==='pro'?'badge-pro':plan==='lifetime'?'badge-lifetime':plan==='business'?'badge-business':plan==='annual'?'badge-annual':'badge-free';
+      var bl = plan==='pro'?'Pro':plan==='lifetime'?'A vie':plan==='business'?'Business':plan==='annual'?'Annuel':'Gratuit';
       var date = c.createdAt&&c.createdAt.seconds ? new Date(c.createdAt.seconds*1000).toLocaleDateString('fr-FR') : '—';
       var svc1 = (c.services&&c.services[0]) ? escapeHtml(c.services[0].substring(0,20)) : '—';
       var slugSafe = escapeHtml(c.slug||c.id);
@@ -368,7 +371,7 @@
         +'<td><span class="badge '+bc+'">'+bl+'</span></td>'
         +'<td style="font-family:var(--mono)">'+(c.vues||0)+'</td>'
         +'<td style="color:var(--muted);font-size:.78rem">'+date+'</td>'
-        +'<td style="display:flex;gap:.3rem;flex-wrap:wrap;align-items:center">'+(c.plan==='free'||!c.plan ? '<button onclick="activerPlan(\''+( c.slug||c.id)+'\',\'pro\')" style="background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.3);color:var(--accent);font-family:var(--mono);font-size:.62rem;padding:.2rem .5rem;border-radius:4px;cursor:pointer">Pro</button><button onclick="activerPlan(\''+( c.slug||c.id)+'\',\'lifetime\')" style="background:rgba(0,212,255,0.15);border:1px solid rgba(0,212,255,0.3);color:var(--accent2);font-family:var(--mono);font-size:.62rem;padding:.2rem .5rem;border-radius:4px;cursor:pointer">A vie</button>' : '')+'<button onclick="envoyerLienOwner(\''+( c.slug||c.id)+'\',\''+( c.owner_token||'')+'\',\''+escapeHtml(c.prenom||'')+'\',\''+escapeHtml(c.nom||'')+'\',\''+( c.plan||'free')+'\')" style="background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.3);color:#25D366;font-size:.75rem;padding:.2rem .5rem;border-radius:4px;cursor:pointer">&#128241; WA</button></td>'
+        +'<td style="display:flex;gap:.3rem;flex-wrap:wrap;align-items:center">'+(c.plan==='free'||!c.plan ? '<button onclick="activerPlan(\''+( c.slug||c.id)+'\',\'pro\')" style="background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.3);color:var(--accent);font-family:var(--mono);font-size:.62rem;padding:.2rem .5rem;border-radius:4px;cursor:pointer">Pro</button><button onclick="activerPlan(\''+( c.slug||c.id)+'\',\'lifetime\')" style="background:rgba(0,212,255,0.15);border:1px solid rgba(0,212,255,0.3);color:var(--accent2);font-family:var(--mono);font-size:.62rem;padding:.2rem .5rem;border-radius:4px;cursor:pointer">A vie</button><button onclick="activerPlan(\''+( c.slug||c.id)+'\',\'annual\')" style="background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);color:#a78bfa;font-family:var(--mono);font-size:.62rem;padding:.2rem .5rem;border-radius:4px;cursor:pointer">Annuel</button><button onclick="activerPlan(\''+( c.slug||c.id)+'\',\'business\')" style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;font-family:var(--mono);font-size:.62rem;padding:.2rem .5rem;border-radius:4px;cursor:pointer">Business</button>' : '')+(c.plan==='business'&&!c.team_code?'<button onclick="creerEquipe(\''+( c.slug||c.id)+'\')" style="background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.4);color:#f59e0b;font-family:var(--mono);font-size:.62rem;padding:.2rem .5rem;border-radius:4px;cursor:pointer">&#128101; Creer equipe</button>':'')+'<button onclick="envoyerLienOwner(\''+( c.slug||c.id)+'\',\''+( c.owner_token||'')+'\',\''+escapeHtml(c.prenom||'')+'\',\''+escapeHtml(c.nom||'')+'\',\''+( c.plan||'free')+'\')" style="background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.3);color:#25D366;font-size:.75rem;padding:.2rem .5rem;border-radius:4px;cursor:pointer">&#128241; WA</button></td>'
         +'<td>'+(c.owner_token ? '<span style="font-family:var(--mono);font-size:.65rem;color:var(--muted);cursor:pointer" onclick="copyOwner(\''+( c.slug||c.id)+'\',\''+c.owner_token+'\')" title="Cliquer pour copier">&#128279; Copier lien</span>' : '<span style="color:var(--muted);font-size:.65rem">—</span>')+'</td>'
         +'</tr>';
     }).join('');
@@ -442,7 +445,7 @@
   window.envoyerLienOwner = function(slug, token, prenom, nom, plan) {
     if (!token) { alert('Pas de token owner pour ' + slug); return; }
     var lien = 'https://chniang.github.io/carte_visite/carte.html?slug=' + slug + '&owner=' + token;
-    var planLabel = plan === 'lifetime' ? 'A vie' : 'Pro';
+    var planLabel = plan === 'lifetime' ? 'A vie' : plan === 'business' ? 'Business' : plan === 'annual' ? 'Annuel' : 'Pro';
     var msg = encodeURIComponent(
       'Bonjour ' + prenom + ' ' + nom + ' !\n\n' +
       'Votre plan CarteViz ' + planLabel + ' est maintenant actif.\n\n' +
@@ -464,6 +467,27 @@
     }).catch(function(){
       prompt('Copie ce lien owner :', url);
     });
+  };
+
+
+  window.creerEquipe = function(slug) {
+    if (!confirm('Creer une equipe Business pour ' + slug + ' ?')) return;
+    fetch('https://carteviz-backend.vercel.app/api/create-team', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({slug: slug, admin_token: sessionStorage.getItem('carteviz_admin_jwt')})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if (data.success) {
+        var msg = 'Equipe creee !\nCode equipe : ' + data.team_code;
+        if (confirm(msg + '\n\nCopier le code ?')) {
+          navigator.clipboard.writeText(data.team_code).catch(function(){ prompt('Code equipe :', data.team_code); });
+        }
+        loadData();
+      } else { alert('Erreur : ' + (data.error || 'inconnue')); }
+    })
+    .catch(function(){ alert('Erreur de connexion'); });
   };
 
   window.activerPlan = function(slug, plan) {
