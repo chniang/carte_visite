@@ -671,6 +671,28 @@
       </a>
     </div>
 
+
+    <!-- Section equipe Business (manager) -->
+    <div id="team-section" style="display:none">
+      <div class="dash-section">
+        <span class="dash-section-title">&#128101; Mon equipe Business</span>
+        <div id="team-code-box" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <div>
+            <div style="font-size:.72rem;color:rgba(255,255,255,0.45);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Code equipe</div>
+            <div id="team-code-val" style="font-family:monospace;font-size:1.4rem;font-weight:700;color:#f59e0b;letter-spacing:.15em">—</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button onclick="shareTeamCode()" style="background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.3);color:#25D366;font-size:.78rem;padding:.35rem .75rem;border-radius:8px;cursor:pointer;font-weight:600">&#128241; Partager</button>
+            <button onclick="copyTeamCode()" style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;font-size:.78rem;padding:.35rem .75rem;border-radius:8px;cursor:pointer;font-weight:600">&#128203; Copier</button>
+          </div>
+        </div>
+        <div id="team-members-list" style="display:flex;flex-direction:column;gap:8px">
+          <div class="empty-state">Chargement...</div>
+        </div>
+        <div id="team-slots" style="font-size:.75rem;color:rgba(255,255,255,0.35);text-align:center;margin-top:8px"></div>
+      </div>
+    </div>
+
     <!-- Métriques principales -->
     <div class="metrics-grid">
       <div class="metric-card">
@@ -1380,6 +1402,51 @@ async function loadDashboard() {
         </div>`;
       }).join('');
     }
+
+
+    // ── Equipe Business (manager) ─────────────────────────
+    const isManager = carteData && carteData.team_role === 'manager' && carteData.team_code;
+    const teamSection = document.getElementById('team-section');
+    if (isManager && teamSection) {
+      teamSection.style.display = 'block';
+      document.getElementById('team-code-val').textContent = carteData.team_code;
+      window._teamCode = carteData.team_code;
+      try {
+        const ownerTk = getOwnerToken();
+        const teamResp = await fetch(
+          'https://carteviz-backend.vercel.app/api/team-members?slug=' +
+          encodeURIComponent(slug) + '&owner_token=' + encodeURIComponent(ownerTk || '')
+        );
+        const teamData = await teamResp.json();
+        const listEl = document.getElementById('team-members-list');
+        const slotsEl = document.getElementById('team-slots');
+        if (teamData.success) {
+          const members = teamData.members || [];
+          if (members.length === 0) {
+            listEl.innerHTML = '<div class="empty-state">Aucun membre pour l instant. Partagez le code equipe !</div>';
+          } else {
+            listEl.innerHTML = members.map(function(m) {
+              return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px">'
+                + '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#818cf8);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0">'
+                + (m.prenom ? m.prenom[0].toUpperCase() : '?')
+                + '</div>'
+                + '<div style="flex:1;min-width:0">'
+                + '<div style="font-weight:600;font-size:.88rem">' + escapeHtml(m.prenom + ' ' + m.nom) + '</div>'
+                + '<div style="font-size:.75rem;color:rgba(255,255,255,0.45)">' + escapeHtml(m.titre || '') + '</div>'
+                + '</div>'
+                + '<div style="font-family:monospace;font-size:.72rem;color:rgba(255,255,255,0.35)">' + (m.vues || 0) + ' vues</div>'
+                + '</div>';
+            }).join('');
+          }
+          if (slotsEl) {
+            slotsEl.textContent = members.length + ' / ' + (teamData.max_members - 1) + ' membres';
+          }
+        }
+      } catch(e) {
+        console.warn('Team load error:', e);
+      }
+    }
+
 
   } catch(err) {
     console.error('Dashboard error:', err.message, err);
