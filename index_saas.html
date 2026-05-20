@@ -54,6 +54,27 @@
       .lien-input { width: 100%; }
       .btn-remove-lien { align-self: flex-end; }
     }
+    
+    /* mobile-overflow-fix-v2 */
+    @media (max-width: 600px) {
+      .preview-sticky { width: 100%; max-width: 100%; overflow: hidden; }
+      .card-preview { width: 100%; max-width: 100%; box-sizing: border-box; }
+      .preview-url {
+        font-size: .72rem; word-break: break-all;
+        overflow-wrap: break-word; white-space: normal;
+      }
+      .lien-row { flex-wrap: wrap; width: 100%; box-sizing: border-box; }
+      .lien-select { width: calc(100% - 44px); flex-shrink: 1; }
+      .lien-input { width: 100%; min-width: 0; box-sizing: border-box; }
+      .btn-remove-lien { flex-shrink: 0; }
+    }
+    @media (max-width: 400px) {
+      .lien-row { flex-direction: column; }
+      .lien-select { width: 100%; }
+      .lien-input { width: 100%; }
+      .form-card { padding: 1rem 0.8rem; }
+      .creator-section { padding: 2.5rem 0.75rem; }
+    }
     </style>
 
   <!-- QR Code -->
@@ -472,6 +493,7 @@
       border-radius: 20px; padding: 2rem;
       box-shadow: var(--shadow);
       position: relative; overflow: hidden;
+      max-width: 100%; box-sizing: border-box; width: 100%;
     }
     .card-preview::before {
       content: '';
@@ -1020,7 +1042,7 @@
     }
     .lien-select:focus { border-color: rgba(167,139,250,0.5); }
     .lien-input {
-      flex: 1; background: var(--bg);
+      flex: 1; min-width: 0; background: var(--bg);
       border: 1px solid var(--border); border-radius: 8px;
       color: var(--text); font-family: var(--dm); font-size: .85rem;
       padding: .6rem .85rem; outline: none;
