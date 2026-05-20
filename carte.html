@@ -1118,22 +1118,8 @@ async function downloadPDF() {
           r.onload = function() { res(r.result); };
           r.readAsDataURL(blob);
         });
-        var circleB64 = await new Promise(function(res) {
-          var cv = document.createElement('canvas');
-          cv.width = 160; cv.height = 160;
-          var ctx = cv.getContext('2d');
-          ctx.beginPath();
-          ctx.arc(80, 80, 80, 0, Math.PI * 2);
-          ctx.closePath();
-          ctx.clip();
-          var img = new Image();
-          img.crossOrigin = 'anonymous';
-          img.onload = function() { ctx.drawImage(img, 0, 0, 160, 160); res(cv.toDataURL('image/png')); };
-          img.onerror = function() { res(null); };
-          img.src = b64;
-        });
-        if (circleB64) {
-          doc.addImage(circleB64, 'PNG', W / 2 - 20, y, 40, 40);
+        if (b64) {
+          doc.addImage(b64, 'JPEG', W / 2 - 20, y, 40, 40);
           photoOK = true;
         }
       } catch(e) { console.warn('Photo PDF error:', e); }
