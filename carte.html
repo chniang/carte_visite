@@ -1110,7 +1110,8 @@ async function downloadPDF() {
     var photoOK = false;
     if (d.photo_url) {
       try {
-        var resp = await fetch(d.photo_url);
+        var proxyURL = 'https://carteviz-backend.vercel.app/api/proxy-photo?url=' + encodeURIComponent(d.photo_url);
+        var resp = await fetch(proxyURL);
         var blob = await resp.blob();
         var b64 = await new Promise(function(res) {
           var r = new FileReader();
