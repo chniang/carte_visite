@@ -31,7 +31,7 @@ export default async function handler(req, res) {
     const plan = data.plan;
     const expire = data.plan_expire;
     const expireDate = expire && expire.toDate ? expire.toDate() : (expire ? new Date(expire) : null);
-    const isPro = (plan === 'pro' || plan === 'lifetime') &&
+    const isPro = (plan === 'pro' || plan === 'lifetime' || plan === 'business' || plan === 'annual') &&
       (!expireDate || expireDate > new Date());
 
     return res.status(200).json({ isPro });
