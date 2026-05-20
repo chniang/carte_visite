@@ -27,10 +27,16 @@ export default async function handler(req, res) {
     if (plan === 'pro') {
       expire = new Date();
       expire.setMonth(expire.getMonth() + 1);
+    } else if (plan === 'annual') {
+      expire = new Date();
+      expire.setFullYear(expire.getFullYear() + 1);
     } else if (plan === 'lifetime') {
       expire = new Date('2125-01-01');
+    } else if (plan === 'business') {
+      expire = new Date();
+      expire.setFullYear(expire.getFullYear() + 1);
     } else {
-      return res.status(400).json({ error: "plan invalide (pro ou lifetime)" });
+      return res.status(400).json({ error: "plan invalide (pro, annual, lifetime, business)" });
     }
 
     await db.collection('cartes').doc(slug).update({
