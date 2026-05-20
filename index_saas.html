@@ -39,7 +39,22 @@
       src: url('fonts/dm-sans-latin.woff2') format('woff2');
       unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
     }
-  </style>
+  
+    /* cv-mobile-fix */
+    @media (max-width: 600px) {
+      .creator-section { padding: 3rem 1rem; }
+      .form-card { overflow: visible; }
+      .lien-input { min-width: 0; width: 100%; }
+      .lien-select { width: 100px; flex-shrink: 0; }
+      input, select, textarea { max-width: 100%; box-sizing: border-box; }
+    }
+    @media (max-width: 400px) {
+      .lien-row { flex-direction: column; }
+      .lien-select { width: 100%; }
+      .lien-input { width: 100%; }
+      .btn-remove-lien { align-self: flex-end; }
+    }
+    </style>
 
   <!-- QR Code -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -318,7 +333,7 @@
       background: var(--surface2); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 2.5rem;
       max-width: 100%;
-      overflow: hidden;
+      overflow: visible;
     }
     @media (max-width: 600px) {
       .form-card { padding: 1.2rem; }
@@ -991,7 +1006,7 @@
       width: 100%; box-sizing: border-box;
     }
     @media (max-width: 600px) {
-      .lien-row { flex-wrap: nowrap; }
+      .lien-row { flex-wrap: wrap; gap: .4rem; }
     }
     .lien-select {
       background: var(--bg); border: 1px solid var(--border);
@@ -1043,6 +1058,18 @@
 
     
   </style>
+
+<!-- CV3D -->
+<style>
+.demo-card-scene{perspective:1400px;display:flex;justify-content:center;align-items:center;padding:48px 24px 80px;overflow:visible}
+.demo-card-wrapper{position:relative;transform-style:preserve-3d;border-radius:26px;animation:cv3d-float 5s ease-in-out infinite;will-change:transform}
+.demo-card-wrapper.cv3d-active{animation:none}
+.demo-card-glow{position:absolute;inset:-4px;border-radius:30px;background:linear-gradient(135deg,rgba(139,92,246,.78),rgba(59,130,246,.55),rgba(236,72,153,.42));z-index:-1;filter:blur(14px);opacity:.5;transition:opacity .4s}
+.demo-card-wrapper:hover .demo-card-glow,.demo-card-wrapper.cv3d-active .demo-card-glow{opacity:1}
+.demo-card-glass{background:rgba(255,255,255,.04);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,.10);border-radius:22px;padding:18px;box-shadow:0 28px 72px rgba(0,0,0,.55),0 0 52px rgba(139,92,246,.10),inset 0 1px 0 rgba(255,255,255,.08)}
+.demo-card-drop{position:absolute;bottom:-34px;left:50%;transform:translateX(-50%);width:65%;height:34px;background:radial-gradient(ellipse,rgba(139,92,246,.38) 0%,transparent 70%);filter:blur(14px);transition:transform .12s ease-out,opacity .3s;pointer-events:none;opacity:.4}
+@keyframes cv3d-float{0%,100%{transform:translateY(0)}30%{transform:translateY(-14px) rotateX(2deg) rotateY(-1.5deg)}70%{transform:translateY(-7px) rotateX(-1.2deg) rotateY(2deg)}}
+</style>
 </head>
 <body>
 
@@ -1183,9 +1210,12 @@
   <p class="section-label">Exemple concret</p>
   <h2 class="section-title">Voici a quoi ressemble une carte</h2>
   <p style="text-align:center;color:var(--muted);margin-bottom:2rem;font-size:.95rem">Cliquez sur la carte pour voir la version complete en direct</p>
-  <div style="display:flex;justify-content:center">
-    <a href="carte.html?slug=cheikh-niang&owner=nfx31varci5s5kx3&ref=demo" target="_blank" style="text-decoration:none;display:block;width:100%;max-width:380px">
-      <div style="background:linear-gradient(135deg,#1a1b2e,#16172a);border:1px solid rgba(167,139,250,0.2);border-radius:20px;padding:2rem;text-align:center;transition:transform .2s,box-shadow .2s;cursor:pointer" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 20px 40px rgba(167,139,250,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+<div class="demo-card-scene">
+  <div class="demo-card-wrapper" id="cv3d-wrap">
+    <div class="demo-card-glow"></div>
+    <div class="demo-card-glass">
+<a href="carte.html?slug=cheikh-niang&owner=nfx31varci5s5kx3&ref=demo" target="_blank" style="text-decoration:none;display:block;width:100%;max-width:380px">
+      <div style="background:linear-gradient(135deg,#1a1b2e,#16172a);border:1px solid rgba(167,139,250,0.2);border-radius:20px;padding:2rem;text-align:center;transition:transform .2s,box-shadow .2s;cursor:pointer">
         <div style="width:80px;height:80px;border-radius:50%;margin:0 auto 1rem;overflow:hidden;border:3px solid rgba(167,139,250,0.4)">
           <img src="https://xpdfwsirpdmmpxeqkpuj.supabase.co/storage/v1/object/public/photos/cheikh-niang-1777326581561.jpg" style="width:100%;height:100%;object-fit:cover" alt="Cheikh Niang" onerror="this.parentNode.innerHTML='&#129489;'" />
         </div>
@@ -1201,7 +1231,10 @@
         </div>
       </div>
     </a>
+    </div>
+    <div class="demo-card-drop"></div>
   </div>
+</div>
   <div style="text-align:center;margin-top:1.5rem">
     <a href="#creer" style="display:inline-block;background:var(--accent);color:#fff;padding:.75rem 2rem;border-radius:12px;font-weight:700;font-size:.95rem;text-decoration:none">Creer ma carte maintenant &rarr;</a>
   </div>
@@ -2193,5 +2226,41 @@
 
 </script>
 
+
+<!-- CV3D Tilt -->
+<script>
+(function(){
+  var scene=document.querySelector('.demo-card-scene');
+  var wrap=document.getElementById('cv3d-wrap');
+  var drop=document.querySelector('.demo-card-drop');
+  if(!scene||!wrap)return;
+  var MAX=15,crx=0,cry=0,trx=0,trY=0,raf=null,active=false;
+  function lerp(a,b,t){return a+(b-a)*t}
+  function tick(){
+    crx=lerp(crx,trx,.11);cry=lerp(cry,trY,.11);
+    wrap.style.transform='rotateX('+crx+'deg) rotateY('+cry+'deg) translateY(-8px) scale(1.018)';
+    if(drop){
+      drop.style.transform='translateX(calc(-50% + '+(-trY*.65)+'px)) translateY('+(trx*.65)+'px)';
+      drop.style.opacity='0.9';
+    }
+    if(active)raf=requestAnimationFrame(tick);
+  }
+  function deactivate(){
+    active=false;trx=0;trY=0;cancelAnimationFrame(raf);
+    (function ease(){
+      crx=lerp(crx,0,.11);cry=lerp(cry,0,.11);
+      wrap.style.transform='rotateX('+crx+'deg) rotateY('+cry+'deg)';
+      if(drop){drop.style.opacity='0.4';drop.style.transform='translateX(-50%)';}
+      if(Math.abs(crx)>.04||Math.abs(cry)>.04){raf=requestAnimationFrame(ease);}
+      else{wrap.classList.remove('cv3d-active');wrap.style.transform='';}
+    }());
+  }
+  scene.addEventListener('mousemove',function(e){var r=scene.getBoundingClientRect();trY=((e.clientX-r.left-r.width/2)/(r.width/2))*MAX;trx=-((e.clientY-r.top-r.height/2)/(r.height/2))*MAX;});
+  scene.addEventListener('mouseenter',function(){active=true;wrap.classList.add('cv3d-active');cancelAnimationFrame(raf);tick();});
+  scene.addEventListener('mouseleave',deactivate);
+  scene.addEventListener('touchmove',function(e){e.preventDefault();var t=e.touches[0];var r=scene.getBoundingClientRect();trY=((t.clientX-r.left-r.width/2)/(r.width/2))*(MAX*.5);trx=-((t.clientY-r.top-r.height/2)/(r.height/2))*(MAX*.5);if(!active){active=true;wrap.classList.add('cv3d-active');cancelAnimationFrame(raf);tick();}},{passive:false});
+  scene.addEventListener('touchend',deactivate);
+}());
+</script>
 </body>
 </html>
