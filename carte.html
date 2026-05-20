@@ -1266,7 +1266,7 @@ function setupUpgradeBanner(data) {
   // Afficher le bouton upgrade si pas de plan pro/lifetime
   const plan = data && data.plan;
   const expire = data && data.plan_expire;
-  const isActive = (plan === 'pro' || plan === 'lifetime') &&
+  const isActive = (plan === 'pro' || plan === 'lifetime' || plan === 'business' || plan === 'annual') &&
     (!expire || new Date(expire.seconds ? expire.seconds * 1000 : expire) > new Date());
 
   const banner = document.getElementById('upgrade-banner');
