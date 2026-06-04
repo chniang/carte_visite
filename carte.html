@@ -1196,7 +1196,7 @@ function openServiceModal(serviceName) {
   const d = window._carteData;
   const plan = d && d.plan;
   const expire = d && d.plan_expire;
-  const isActive = (plan === 'pro' || plan === 'lifetime') &&
+  const isActive = (plan === 'pro' || plan === 'lifetime' || plan === 'annual' || plan === 'business') &&
     (!expire || new Date(expire.seconds ? expire.seconds*1000 : expire) > new Date());
 
   const owner = new URLSearchParams(window.location.search).get('owner');
@@ -1320,7 +1320,7 @@ async function toggleDashboard() {
     const d = window._carteData;
     const plan = d && d.plan;
     const expire = d && d.plan_expire;
-    isPro = (plan === 'pro' || plan === 'lifetime') &&
+    isPro = (plan === 'pro' || plan === 'lifetime' || plan === 'annual' || plan === 'business') &&
       (!expire || new Date(expire.seconds ? expire.seconds*1000 : expire) > new Date());
   }
 
