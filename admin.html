@@ -298,7 +298,9 @@
   }
 
   function isProActive(c) {
-    if (c.plan !== 'pro') return false;
+    var p = c.plan;
+    if (p !== 'pro' && p !== 'annual' && p !== 'business' && p !== 'lifetime') return false;
+    if (p === 'lifetime') return true;
     var expire = c.plan_expire;
     if (!expire) return false;
     return new Date(expire.seconds ? expire.seconds * 1000 : expire) > new Date();
@@ -308,13 +310,15 @@
     visites = visites || [];
     vuesParSlug = vuesParSlug || {};
     var total = cartes.length;
-    var pro  = cartes.filter(function(c){ return isProActive(c); }).length;
-    var life = cartes.filter(function(c){ return c.plan === 'lifetime'; }).length;
-    var free = cartes.filter(function(c){ return !isProActive(c) && c.plan !== 'lifetime'; }).length;
-    var vues = Object.values(vuesParSlug).reduce(function(s,n){ return s+n; }, 0);
-    var mrr = pro * 2500;
-    var ltv = life * 15000;
-    var rev = mrr + ltv;
+    var annual   = cartes.filter(function(c){ return isProActive(c) && c.plan === 'annual'; }).length;
+    var business = cartes.filter(function(c){ return isProActive(c) && c.plan === 'business'; }).length;
+    var life     = cartes.filter(function(c){ return c.plan === 'lifetime'; }).length;
+    var pro      = cartes.filter(function(c){ return isProActive(c) && (c.plan === 'pro' || c.plan === 'annual' || c.plan === 'business'); }).length;
+    var free     = cartes.filter(function(c){ return !isProActive(c); }).length;
+    var vues     = Object.values(vuesParSlug).reduce(function(s,n){ return s+n; }, 0);
+    var mrr      = annual * Math.round(10000/12) + business * Math.round(75000/12);
+    var ltv      = life * 25000;
+    var rev      = annual * 10000 + business * 75000 + ltv;
 
     // KPIs
     document.getElementById('k-total').textContent = total;
@@ -334,9 +338,10 @@
     // Repartition
     var t = total||1;
     var items = [
-      {label:'Gratuit',val:free,color:'#5a6070',pct:Math.round(free/t*100)},
-      {label:'Pro',val:pro,color:'#00ff88',pct:Math.round(pro/t*100)},
-      {label:'A vie',val:life,color:'#00d4ff',pct:Math.round(life/t*100)},
+      {label:'Gratuit',   val:free,     color:'#5a6070', pct:Math.round(free/t*100)},
+      {label:'Annuel',    val:annual,   color:'#a78bfa', pct:Math.round(annual/t*100)},
+      {label:'Business',  val:business, color:'#f59e0b', pct:Math.round(business/t*100)},
+      {label:'A vie',     val:life,     color:'#00d4ff', pct:Math.round(life/t*100)},
     ];
     document.getElementById('rep-list').innerHTML = items.map(function(i){
       return '<div class="rep-item"><span class="rep-label" style="color:'+i.color+'">'+escapeHtml(i.label)+'</span><div class="rep-bar-bg"><div class="rep-bar" style="width:'+i.pct+'%;background:'+i.color+'"></div></div><span class="rep-count">'+i.val+'</span></div>';
@@ -428,8 +433,9 @@
       cartes.forEach(function(c) {
         var ts = c.createdAt && c.createdAt.seconds ? c.createdAt.seconds*1000 : 0;
         if (ts >= rs && ts < re) {
-          if (c.plan === 'pro') cumul += 2500;
-          if (c.plan === 'lifetime') cumul += 15000;
+          if (c.plan === 'annual')   cumul += Math.round(10000/12);
+          if (c.plan === 'business')  cumul += Math.round(75000/12);
+          if (c.plan === 'lifetime')  cumul += 25000;
         }
       });
       revData.push(cumul);
