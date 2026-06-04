@@ -1,19 +1,22 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // ── Cartes publiques ─────────────────────────────────────
+    // CONNU : owner_token lisible (architecture magic-link)
+    // Fix complet necessite migration vers subcollection privee
     match /cartes/{slug} {
-
       allow create: if false;
-
       allow read: if true;
-
       allow update: if
         request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['vues', 'clics_whatsapp']);
-
       allow delete: if false;
     }
 
+    // ── Visites analytics ────────────────────────────────────
+    // Ecriture : validee (slug + timestamp requis)
+    // Lecture : bloquee cote client - passer par API backend
     match /visites/{id} {
       allow create: if
         request.resource.data.keys().hasAll(['slug', 'timestamp']) &&
@@ -23,5 +26,15 @@ service cloud.firestore {
       allow read: if true;
       allow update, delete: if false;
     }
+
+    // ── Equipes Business ─────────────────────────────────────
+    // Lecture et ecriture : backend uniquement (service account)
+    match /teams/{teamCode} {
+      allow read: if false;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
   }
 }
