@@ -42,8 +42,11 @@ export default async function handler(req, res) {
 
     const team_code = randomBytes(3).toString("hex").toUpperCase();
 
-    const expire = new Date();
-    expire.setFullYear(expire.getFullYear() + 1);
+    // Synchroniser l expiration equipe avec le plan Business du manager
+    const carteExpire = carteData.plan_expire;
+    const expire = carteExpire
+      ? new Date(carteExpire.toDate ? carteExpire.toDate() : carteExpire)
+      : (() => { const d = new Date(); d.setFullYear(d.getFullYear() + 1); return d; })();
 
     await db.collection("teams").doc(team_code).set({
       team_code,

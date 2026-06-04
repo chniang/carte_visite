@@ -1201,7 +1201,6 @@ function openServiceModal(serviceName) {
     (!expire || new Date(expire.seconds ? expire.seconds*1000 : expire) > new Date());
 
   const owner = new URLSearchParams(window.location.search).get('owner');
-  const validOwner = owner && d.owner_token && owner === d.owner_token;
   if (!isActive) return; // Modal visible par tous si plan Pro actif
 
   const desc = getServiceDescription(serviceName, d.services_descriptions);

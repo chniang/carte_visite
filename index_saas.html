@@ -1590,7 +1590,6 @@
   try {
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
-    window.storage = firebase.storage();
     firebaseReady = true;
     console.log('✅ Firebase connecté');
   } catch (err) {
@@ -1744,9 +1743,6 @@
     const tel      = document.getElementById('f-tel').value.trim();
     const email    = document.getElementById('f-email').value.trim();
     const lieu     = document.getElementById('f-lieu').value.trim();
-    const github   = '';
-    const linkedin = '';
-    const portfolio= '';
     const photo    = document.getElementById('f-photo').value.trim();
     const services = getSelectedServices();
 
