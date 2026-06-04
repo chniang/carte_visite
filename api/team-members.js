@@ -54,7 +54,7 @@ export default async function handler(req, res) {
           tel: m.tel,
           email: m.email,
           vues: m.vues || 0,
-          photo_url: m.photo_url || ""
+          photo_url: m.photo || m.photo_url || ""
         };
       });
 
