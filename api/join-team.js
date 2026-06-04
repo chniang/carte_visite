@@ -30,6 +30,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Cette carte est deja dans une equipe" });
     }
 
+    // Securite : plan payant requis pour rejoindre
+    const plansPayants = ['annual', 'business', 'lifetime', 'pro'];
+    if (!plansPayants.includes(carte.plan)) {
+      return res.status(403).json({ error: 'Plan payant requis pour rejoindre une equipe Business' });
+    }
+
     const teamDoc = await db.collection("teams").doc(team_code.toUpperCase()).get();
     if (!teamDoc.exists) return res.status(404).json({ error: "Code equipe invalide" });
 
