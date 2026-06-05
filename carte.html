@@ -1034,7 +1034,7 @@ async function loadCarte() {
     document.getElementById('contact-list').innerHTML = contacts.map(c=>
       `<a class="contact-item" href="${c.href}" ${c.blank?'target="_blank"':''}>
         <span class="contact-icon">${c.icon}</span>
-        <div><span class="contact-label">${escapeHtml(c.label)}</span><span class="contact-val">${escapeHtml(c.val)}</span></div>
+        <div><span class="contact-label">${(c.label||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</span><span class="contact-val">${(c.val||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</span></div>
       </a>`
     ).join('');
 
@@ -1043,7 +1043,7 @@ async function loadCarte() {
     if (services.length > 0) {
       document.getElementById('section-services').style.display = 'block';
       document.getElementById('services-list').innerHTML =
-        services.map(s=>`<span class="service-tag" onclick="openServiceModal(this.dataset.svc)" data-svc="${escapeHtml(s)}">${escapeHtml(s)}</span>`).join('');
+        services.map(s=>{const se=(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");return `<span class="service-tag" onclick="openServiceModal(this.dataset.svc)" data-svc="${se}">${se}</span>`;}).join('');
     }
 
 
