@@ -1003,7 +1003,8 @@ async function loadCarte() {
     const avatarEl = document.getElementById('avatar');
     if (d.photo) {
       const _safeInit = (initials(d.prenom,d.nom)||"").replace(/['<>&]/g,"");
-      avatarEl.innerHTML = `<img src="${d.photo}" alt="${escapeHtml(fullName)}" onerror="this.parentNode.textContent='${_safeInit}'" />`;
+      const _safeAlt = (fullName||"").replace(/['"<>&]/g,"");
+      avatarEl.innerHTML = `<img src="${d.photo}" alt="${_safeAlt}" onerror="this.parentNode.textContent='${_safeInit}'" />`;
     } else {
       avatarEl.textContent = initials(d.prenom, d.nom);
     }
